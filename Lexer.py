@@ -2,6 +2,7 @@ import re
 from typing import List, Tuple
 
 def returnTupleFromString(stringToParse : str) -> Tuple[str, str]:
+
     if (stringToParse == "+"):
         return (("PLUS", stringToParse))
     if (stringToParse == "-"):
@@ -16,7 +17,9 @@ def returnTupleFromString(stringToParse : str) -> Tuple[str, str]:
         return (("IF", stringToParse))
     if (stringToParse == "else"):
         return (("ELSE", stringToParse))
-    if (stringToParse == ""):
+    if (stringToParse == "="):
+        return (("ASSIGN", stringToParse))
+    if (stringToParse == "=="):
         return (("EQUAL", stringToParse))
     if (stringToParse == ";"):
         return (("SEMICOLON", stringToParse))
@@ -42,7 +45,7 @@ def fileToWordlist(string_file : str) -> List[str]:
     if(len(string_file) <= 0):
         return [""]
     current_wordlist = fileToWordlist(string_file[1:])
-    if(string_file[0] == ' ' or string_file[0] == '\t' or string_file == '\n'):
+    if(string_file[0] == ' ' or string_file[0] == '\t' or string_file[0] == '\n' or string_file[0] == '\r'):
         current_wordlist = [""] + current_wordlist
 
     else:
@@ -55,6 +58,13 @@ def wordlistToTokens(wordlist : List[str]) -> List[Tuple[str, str]]:
     if(len(wordlist) == 0):
         return []
     currentTokenlist = wordlistToTokens(wordlist[1:])
+    word_to_parse = wordlist[0]
+
+    # remove /n /r
+    word_to_parse = word_to_parse.strip()
+    if(len(word_to_parse) == 0):
+        return currentTokenlist
+
     new_tuple = returnTupleFromString(wordlist[0])
     return ([Token(new_tuple)] + currentTokenlist)
 

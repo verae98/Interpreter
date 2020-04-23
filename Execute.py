@@ -2,13 +2,18 @@ from typing import Tuple
 
 class enum():
     def __init__(self):
+        self.variables = {}
         self.enum_dict = {}
         self.enum_dict["PLUS"] = lambda a, b : float(a) + float(b)
         self.enum_dict["MIN"] = lambda a, b: float(a) - float(b)
         self.enum_dict["MULTIPLY"] = lambda a, b: float(a) * float(b)
         self.enum_dict["DEVIDED_BY"] = lambda a, b: float(a) / float(b)
+        self.enum_dict["ASSIGN"] = lambda d, key, value: d.update({key:value})
+        self.enum_dict["EQUAL"] = lambda a, b : a == b
 
     def execute(self, key : str, arg : Tuple):
+        if(key == "ASSIGN"):
+            return self.enum_dict[key](*(self.variables, *(arg)))
         return self.enum_dict[key](*arg)
 
     def _loopNode(self, node):
@@ -27,5 +32,4 @@ class enum():
         if(len(nodes) == 0):
             return
         self.AST_to_actions(nodes[0:-1])
-
-        print(self._loopNode(nodes[-1]))
+        self._loopNode(nodes[-1])

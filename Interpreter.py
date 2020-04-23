@@ -14,6 +14,9 @@ def findNode(node : Node) -> Union[Node,None]:
         return findNode(node.rhs)
     return None
 
+def createBlock(tokens : List[Token]):
+    nodes = processTokens(tokens[0:-1])
+
 def processTokens(tokens: List[Token]) -> [Node]:
     if(len(tokens) == 0):
         return [Node()]
@@ -32,6 +35,16 @@ def processTokens(tokens: List[Token]) -> [Node]:
         node_.operator = currentToken.instance
         node_.lhs = new_node
     elif (currentToken.instance == "SEMICOLON"):
+        if(nodes[-2].operator == "ASSIGN" and nodes[-2].rhs == None):
+            print("swich assign")
+            nodes[-2].rhs = nodes[-1]
+            print(nodes[-2])
+            nodes[-1] = Node()
+        else:
+            nodes.append(Node())
+    elif (currentToken.instance == "ASSIGN"):
+        new_node = Node(currentToken.type, current_node, currentToken.instance)
+        nodes[-1] = new_node
         nodes.append(Node())
     else:
         new_node = Node(currentToken.type)
@@ -56,5 +69,6 @@ if __name__ == '__main__':
     time.sleep(1)
     print("--")
     print(tree)
-
-    enum.AST_to_actions(enum(), tree)
+    exec = enum()
+    exec.AST_to_actions(tree)
+    print(exec.variables)
