@@ -3,7 +3,10 @@ from typing import Tuple
 class enum():
     def __init__(self):
         self.enum_dict = {}
-        self.enum_dict["PLUS"] = lambda a, b : int(a) + int(b)
+        self.enum_dict["PLUS"] = lambda a, b : float(a) + float(b)
+        self.enum_dict["MIN"] = lambda a, b: float(a) - float(b)
+        self.enum_dict["MULTIPLY"] = lambda a, b: float(a) * float(b)
+        self.enum_dict["DEVIDED_BY"] = lambda a, b: float(a) / float(b)
 
     def execute(self, key : str, arg : Tuple):
         return self.enum_dict[key](*arg)

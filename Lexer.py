@@ -6,7 +6,11 @@ def returnTupleFromString(stringToParse : str) -> Tuple[str, str]:
         return (("PLUS", stringToParse))
     if (stringToParse == "-"):
         return (("MIN", stringToParse))
-    if (stringToParse.isnumeric()):
+    if (stringToParse == "*"):
+        return (("MULTIPLY", stringToParse))
+    if (stringToParse == "/"):
+        return (("DEVIDED_BY", stringToParse))
+    if (stringToParse.isnumeric() or (stringToParse[0] == "-" and stringToParse[1:].isnumeric())):
         return (("NUMBER", stringToParse))
     if(stringToParse == "if"):
         return (("IF", stringToParse))
