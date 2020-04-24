@@ -84,7 +84,6 @@ def processComparison(token: Token, current_node) -> Node:
 def processIf(tokens: List[Token]) -> ([Node], State):
     if (len(tokens) == 0):
         return [Node()], State.Idle
-
     nodes, state = processIf(tokens[0:-1])
     currentToken = tokens[-1]
     current_node = nodes[-1]
@@ -112,18 +111,18 @@ def processIf(tokens: List[Token]) -> ([Node], State):
 
     if (state == State.IF_BLOCK):
         if (currentToken.instance == "LBRACE"):
-            nodes.append(Node())
+            #nodes.append(Node())
             return nodes, state
         if (currentToken.instance == "RPAREN"):
             return nodes, state
 
     return nodes, state
 
-def processTokens(tokens: List[Token]) -> ([Node], State):
+def processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
     if(len(tokens) == 0):
-        return [Node()], State.Idle
+        return [Node()], State.Idle, []
 
-    nodes, state = processTokens(tokens[0:-1])
+    nodes, state, unprocessedTokens = processTokens(tokens[0:-1])
     currentToken = tokens[-1]
     current_node = nodes[-1]
 
@@ -139,7 +138,21 @@ def processTokens(tokens: List[Token]) -> ([Node], State):
     elif(state == State.Math):
         print("math")
         nodes[-1] = processMath(currentToken, current_node)
-        return nodes, State.Math
+        return nodes, State.Math, unprocessedTokens
+
+    elif(state == State.IF):
+        unprocessedTokens.append(currentToken)
+        if(currentToken.instance == "RBRACE"):
+            new_node, status_if = processIf(unprocessedTokens)
+            print ("-->")
+            print(new_node)
+            print("<--")
+            nodes.append(new_node[0])
+            unprocessedTokens = []
+            state = State.Idle
+            nodes.append(Node())
+
+        return nodes, state, unprocessedTokens
 
     elif(currentToken.instance == "PLUS" or currentToken.instance == "MIN" or currentToken.instance == "MULTIPLY" or currentToken.instance == "DEVIDED_BY"):
         state = State.Math
@@ -150,7 +163,8 @@ def processTokens(tokens: List[Token]) -> ([Node], State):
         nodes[-1] = new_node
         nodes.append(Node())
 
-    elif(currentToken == "IF"):
+    elif(currentToken.instance == "IF"):
+        unprocessedTokens.append(currentToken)
         state = State.IF
 
     else:
@@ -167,7 +181,7 @@ def processTokens(tokens: List[Token]) -> ([Node], State):
             elif (node_.rhs == None):
                 node_.rhs = new_node
 
-    return nodes, state
+    return nodes, state, unprocessedTokens
 
 
 if __name__ == '__main__':
@@ -176,8 +190,8 @@ if __name__ == '__main__':
     print(lexer_list)
     print ("\n")
 
-    tree, state = processIf(lexer_list)
-
+    tree, state, _unprocessedTokens = processTokens(lexer_list)
+    print("----------------")
     print(tree)
 
 
