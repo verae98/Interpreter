@@ -27,11 +27,11 @@ class enum():
             return node.value
         left = None
         right = None
+
         if(node.lhs != None):
             left = self._loopNode(node.lhs)
         if(node.rhs != None):
             right = self._loopNode(node.rhs)
-
         return self.execute(str(node.operator), (left, right))
 
     def AST_to_actions(self, nodes):

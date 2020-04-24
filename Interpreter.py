@@ -27,10 +27,15 @@ class State(Enum):
     IF_BLOCK = 4
     BLOCK = 5
     ASSIGN = 6
+    DONE = 7
 
 
-def processMath(token: Token, current_node) -> Node:
-    currentToken = token
+def processMath(tokens: [Token]) -> Node:
+    if (len(tokens) == 0):
+        return Node()
+    nodes = processMath(tokens[0:-1])
+    currentToken = tokens[-1]
+    current_node = nodes
 
     if (currentToken.instance == "PLUS" or currentToken.instance == "MIN"):
         new_node = Node(currentToken.type, current_node, currentToken.instance)
@@ -46,7 +51,6 @@ def processMath(token: Token, current_node) -> Node:
         new_node = Node(currentToken.type)
         # check if list is empty
         if(current_node.value == None):
-            print("created node")
             current_node = new_node
         else:
             # get empty node
@@ -118,6 +122,41 @@ def processIf(tokens: List[Token]) -> ([Node], State):
 
     return nodes, state
 
+def processAssign(tokens: List[Token], index : int) -> (Node, State):
+    if (index <= -1):
+        return Node(), State.Idle
+
+    current_node, state = processAssign(tokens, index-1)
+    currentToken = tokens[index]
+
+    if (state == State.DONE):
+        return current_node, state
+
+    elif(state == State.ASSIGN):
+        rhs, status, unprocessed = processTokens(tokens[index:])
+        # returns list[Node] so get only first element
+        current_node.rhs = rhs[0]
+        state = State.DONE
+
+    elif (currentToken.instance == "ASSIGN"):
+        current_node = Node(currentToken.type, current_node, currentToken.instance)
+        state = State.ASSIGN
+    else:
+        new_node = Node(currentToken.type)
+        # check if list is empty
+        if (current_node.value == None):
+            current_node = new_node
+        else:
+            # get empty node
+            time.sleep(1)
+            node_ = findNode(current_node)
+            if (node_.lhs == None):
+                node_.lhs = new_node
+            elif (node_.rhs == None):
+                node_.rhs = new_node
+
+    return current_node, state
+
 def processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
     if(len(tokens) == 0):
         return [Node()], State.Idle, []
@@ -127,26 +166,27 @@ def processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
     current_node = nodes[-1]
 
     if(currentToken.instance == "SEMICOLON"):
-        state = State.Idle
+        if (state == State.Math):
+            new_node = processMath(unprocessedTokens)
+            nodes[-1] = (new_node)
+            unprocessedTokens = []
+            return nodes, State.Idle, unprocessedTokens
 
-        if (len(nodes) >= 2 and nodes[-2].operator == "ASSIGN" and nodes[-2].rhs == None):
-            nodes[-2].rhs = nodes[-1]
-            nodes[-1] = Node()
+        if (state == State.ASSIGN):
+            unprocessedTokens.append(currentToken)
+            new_node, state_ = processAssign(unprocessedTokens, len(unprocessedTokens)-1)
+            nodes.append(new_node)
+            unprocessedTokens = []
+            return nodes, State.Idle, unprocessedTokens
         else:
             nodes.append(Node())
 
-    elif(state == State.Math):
-        print("math")
-        nodes[-1] = processMath(currentToken, current_node)
-        return nodes, State.Math, unprocessedTokens
+        state = State.Idle
 
     elif(state == State.IF):
         unprocessedTokens.append(currentToken)
         if(currentToken.instance == "RBRACE"):
             new_node, status_if = processIf(unprocessedTokens)
-            print ("-->")
-            print(new_node)
-            print("<--")
             nodes.append(new_node[0])
             unprocessedTokens = []
             state = State.Idle
@@ -155,31 +195,21 @@ def processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
         return nodes, state, unprocessedTokens
 
     elif(currentToken.instance == "PLUS" or currentToken.instance == "MIN" or currentToken.instance == "MULTIPLY" or currentToken.instance == "DEVIDED_BY"):
-        state = State.Math
-        nodes[-1] = processMath(currentToken, current_node)
+        if(state == State.Idle):
+            state = State.Math
+        unprocessedTokens.append(currentToken)
 
     elif (currentToken.instance == "ASSIGN"):
-        new_node = Node(currentToken.type, current_node, currentToken.instance)
-        nodes[-1] = new_node
-        nodes.append(Node())
+        unprocessedTokens.append(currentToken)
+        if (state == State.Idle):
+            state = State.ASSIGN
 
     elif(currentToken.instance == "IF"):
         unprocessedTokens.append(currentToken)
         state = State.IF
 
     else:
-        new_node = Node(currentToken.type)
-        # check if list is empty
-        if(current_node.value == None):
-            print("created node")
-            nodes[-1] = new_node
-        else:
-            # get empty node
-            node_ = findNode(current_node)
-            if(node_.lhs == None):
-                node_.lhs = new_node
-            elif (node_.rhs == None):
-                node_.rhs = new_node
+        unprocessedTokens.append(currentToken)
 
     return nodes, state, unprocessedTokens
 
@@ -188,23 +218,15 @@ if __name__ == '__main__':
 
     lexer_list = lexer("test.txt")
     print(lexer_list)
-    print ("\n")
+    #tree, state = processAssign(lexer_list, len(lexer_list)-1)
+    tree, state, unprocessed = processTokens(lexer_list)
+    #tree, state = processAssign(lexer_list, len(lexer_list)-1)
 
-    tree, state, _unprocessedTokens = processTokens(lexer_list)
-    print("----------------")
+    print("TREE:")
     print(tree)
 
+    time.sleep(1)
 
     exec = enum()
-    print ("----------------")
-    time.sleep(1)
     exec.AST_to_actions(tree)
-
-    '''
-    tree, state = processTokens(lexer_list)
-    print("--")
-    print(tree)
-    time.sleep(1)
-    exec = enum()
-    exec.AST_to_actions(tree)
-    print(exec.variables)'''
+    print(exec.variables)
