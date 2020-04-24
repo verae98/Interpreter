@@ -10,6 +10,12 @@ class enum():
         self.enum_dict["DEVIDED_BY"] = lambda a, b: float(a) / float(b)
         self.enum_dict["ASSIGN"] = lambda d, key, value: d.update({key:value})
         self.enum_dict["EQUAL"] = lambda a, b : a == b
+        self.enum_dict["NOTEQUAL"] = lambda a, b: a != b
+        self.enum_dict["GE"] = lambda a, b: a >= b
+        self.enum_dict["SE"] = lambda a, b: a <= b
+        self.enum_dict["GREATER"] = lambda a, b: a > b
+        self.enum_dict["SMALLER"] = lambda a, b: a < b
+        self.enum_dict["IF"] = lambda a, b: a
 
     def execute(self, key : str, arg : Tuple):
         if(key == "ASSIGN"):
@@ -32,4 +38,4 @@ class enum():
         if(len(nodes) == 0):
             return
         self.AST_to_actions(nodes[0:-1])
-        self._loopNode(nodes[-1])
+        print(self._loopNode(nodes[-1]))

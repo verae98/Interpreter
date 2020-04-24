@@ -19,8 +19,20 @@ def returnTupleFromString(stringToParse : str) -> Tuple[str, str]:
         return (("ELSE", stringToParse))
     if (stringToParse == "="):
         return (("ASSIGN", stringToParse))
+
     if (stringToParse == "=="):
         return (("EQUAL", stringToParse))
+    if (stringToParse == "!="):
+        return (("NOTEQUAL", stringToParse))
+    if (stringToParse == ">="):
+        return (("GE", stringToParse))
+    if (stringToParse == "<="):
+        return (("SE", stringToParse))
+    if (stringToParse == ">"):
+        return (("GREATER", stringToParse))
+    if (stringToParse == "<"):
+        return (("SMALLER", stringToParse))
+
     if (stringToParse == ";"):
         return (("SEMICOLON", stringToParse))
     if (stringToParse == "("):
@@ -60,7 +72,7 @@ def wordlistToTokens(wordlist : List[str]) -> List[Tuple[str, str]]:
     currentTokenlist = wordlistToTokens(wordlist[1:])
     word_to_parse = wordlist[0]
 
-    # remove /n /r
+    # remove /n /r or double spaces
     word_to_parse = word_to_parse.strip()
     if(len(word_to_parse) == 0):
         return currentTokenlist
