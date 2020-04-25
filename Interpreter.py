@@ -25,7 +25,6 @@ class State(Enum):
     IF = 2
     IF_CONDITION = 3
     IF_BLOCK = 4
-    BLOCK = 5
     ASSIGN = 6
     DONE = 7
 
@@ -85,11 +84,11 @@ def processComparison(token: Token, current_node) -> Node:
 
 
 
-def processIf(tokens: List[Token]) -> ([Node], State):
-    if (len(tokens) == 0):
+def processIf(tokens: List[Token], index : int) -> ([Node], State):
+    if (index <= -1):
         return [Node()], State.Idle
-    nodes, state = processIf(tokens[0:-1])
-    currentToken = tokens[-1]
+    nodes, state = processIf(tokens, index-1)
+    currentToken = tokens[index]
     current_node = nodes[-1]
 
     if (currentToken.instance == "IF"):
@@ -101,13 +100,11 @@ def processIf(tokens: List[Token]) -> ([Node], State):
             nodes.append(Node())
             return nodes, state
         if(currentToken.instance == "RPAREN"):
-            state = State.BLOCK
-
+            state = State.IF_BLOCK
             # set condition node to lhs of if node
             nodes[-2].lhs = nodes[-1]
             # current node is empty
             nodes[-1] = Node()
-
             return nodes, state
         else:
             nodes[-1] = processComparison(currentToken, current_node)
@@ -115,7 +112,10 @@ def processIf(tokens: List[Token]) -> ([Node], State):
 
     if (state == State.IF_BLOCK):
         if (currentToken.instance == "LBRACE"):
-            #nodes.append(Node())
+            nodes.append(Node())
+            in_braces, state, unprocessed = processTokens(tokens[index+1:-1])
+            nodes[0].rhs = in_braces
+            state = State.DONE
             return nodes, state
         if (currentToken.instance == "RPAREN"):
             return nodes, state
@@ -178,15 +178,17 @@ def processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
             nodes.append(new_node)
             unprocessedTokens = []
             return nodes, State.Idle, unprocessedTokens
+        if(state != State.Idle):
+            unprocessedTokens.append(currentToken)
         else:
+            state = State.Idle
             nodes.append(Node())
 
-        state = State.Idle
 
     elif(state == State.IF):
         unprocessedTokens.append(currentToken)
         if(currentToken.instance == "RBRACE"):
-            new_node, status_if = processIf(unprocessedTokens)
+            new_node, status_if = processIf(unprocessedTokens, len(unprocessedTokens)-1)
             nodes.append(new_node[0])
             unprocessedTokens = []
             state = State.Idle
@@ -218,7 +220,7 @@ if __name__ == '__main__':
 
     lexer_list = lexer("test.txt")
     print(lexer_list)
-    #tree, state = processAssign(lexer_list, len(lexer_list)-1)
+    #tree, state = processIf(lexer_list, len(lexer_list)-1)
     tree, state, unprocessed = processTokens(lexer_list)
     #tree, state = processAssign(lexer_list, len(lexer_list)-1)
 

@@ -28,10 +28,14 @@ class enum():
         left = None
         right = None
 
-        if(node.lhs != None):
-            left = self._loopNode(node.lhs)
-        if(node.rhs != None):
-            right = self._loopNode(node.rhs)
+        if(node.operator == "IF"):
+            if(self._loopNode(node.lhs)):
+                self.AST_to_actions(node.rhs)
+        else:
+            if(node.lhs != None):
+                left = self._loopNode(node.lhs)
+            if(node.rhs != None):
+                right = self._loopNode(node.rhs)
         return self.execute(str(node.operator), (left, right))
 
     def AST_to_actions(self, nodes):
