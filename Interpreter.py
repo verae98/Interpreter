@@ -27,6 +27,9 @@ class State(Enum):
     IF_BLOCK = 4
     ASSIGN = 6
     DONE = 7
+    WHILE = 8
+    WHILE_CONDITION = 9
+    WHILE_BLOCK = 10
 
 
 def processMath(tokens: [Token]) -> Node:
@@ -157,6 +160,44 @@ def processAssign(tokens: List[Token], index : int) -> (Node, State):
 
     return current_node, state
 
+def processWhile(tokens: List[Token], index : int) -> ([Node], State):
+    if (index <= -1):
+        return [Node()], State.Idle
+    nodes, state = processWhile(tokens, index-1)
+    currentToken = tokens[index]
+    current_node = nodes[-1]
+
+    if (currentToken.instance == "WHILE"):
+        new_node = Node(currentToken.type, None, currentToken.instance)
+        nodes[-1] = new_node
+        return nodes , State.WHILE_CONDITION
+    if (state == State.WHILE_CONDITION):
+        if (currentToken.instance == "LPAREN"):
+            nodes.append(Node())
+            return nodes, state
+        if(currentToken.instance == "RPAREN"):
+            state = State.WHILE_BLOCK
+            # set condition node to lhs of if node
+            nodes[-2].lhs = nodes[-1]
+            # current node is empty
+            nodes[-1] = Node()
+            return nodes, state
+        else:
+            nodes[-1] = processComparison(currentToken, current_node)
+            return nodes, state
+
+    if (state == State.WHILE_BLOCK):
+        if (currentToken.instance == "LBRACE"):
+            nodes.append(Node())
+            in_braces, state, unprocessed = processTokens(tokens[index+1:-1])
+            nodes[0].rhs = in_braces
+            state = State.DONE
+            return nodes, state
+        if (currentToken.instance == "RPAREN"):
+            return nodes, state
+
+    return nodes, state
+
 def processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
     if(len(tokens) == 0):
         return [Node()], State.Idle, []
@@ -184,6 +225,16 @@ def processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
             state = State.Idle
             nodes.append(Node())
 
+    elif (state == State.WHILE):
+        unprocessedTokens.append(currentToken)
+        if (currentToken.instance == "RBRACE"):
+            new_node, status_while = processWhile(unprocessedTokens, len(unprocessedTokens) - 1)
+            nodes.append(new_node[0])
+            unprocessedTokens = []
+            state = State.Idle
+            nodes.append(Node())
+
+        return nodes, state, unprocessedTokens
 
     elif(state == State.IF):
         unprocessedTokens.append(currentToken)
@@ -209,6 +260,10 @@ def processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
     elif(currentToken.instance == "IF"):
         unprocessedTokens.append(currentToken)
         state = State.IF
+
+    elif (currentToken.instance == "WHILE"):
+        unprocessedTokens.append(currentToken)
+        state = State.WHILE
 
     else:
         unprocessedTokens.append(currentToken)

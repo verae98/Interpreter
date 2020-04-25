@@ -15,7 +15,17 @@ class enum():
         self.enum_dict["SE"] = lambda a, b: a <= b
         self.enum_dict["GREATER"] = lambda a, b: a > b
         self.enum_dict["SMALLER"] = lambda a, b: a < b
-        self.enum_dict["IF"] = lambda a, b: a
+        self.enum_dict["IF"] = lambda a, b: self.iffunc(a, b)
+        self.enum_dict["WHILE"] = lambda a, b: self.whilefunc(a, b)
+        self.enum_dict["VAR"] = lambda a, b: self.variables[a]
+
+    def whilefunc(self, a, b):
+        while(a):
+            self.AST_to_actions(b)
+
+    def iffunc(self, a, b):
+        if(a):
+            self.AST_to_actions(b)
 
     def execute(self, key : str, arg : Tuple):
         if(key == "ASSIGN"):
@@ -28,14 +38,12 @@ class enum():
         left = None
         right = None
 
-        if(node.operator == "IF"):
-            if(self._loopNode(node.lhs)):
-                self.AST_to_actions(node.rhs)
+        if(node.lhs != None):
+            left = self._loopNode(node.lhs)
+        if(node.rhs != None and (not isinstance(node.rhs, list))):
+            right = self._loopNode(node.rhs)
         else:
-            if(node.lhs != None):
-                left = self._loopNode(node.lhs)
-            if(node.rhs != None):
-                right = self._loopNode(node.rhs)
+            right = node.rhs
         return self.execute(str(node.operator), (left, right))
 
     def AST_to_actions(self, nodes):

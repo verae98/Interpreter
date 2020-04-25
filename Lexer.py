@@ -19,6 +19,8 @@ def returnTupleFromString(stringToParse : str) -> Tuple[str, str]:
         return (("ELSE", stringToParse))
     if (stringToParse == "="):
         return (("ASSIGN", stringToParse))
+    if (stringToParse == "while"):
+        return (("WHILE", stringToParse))
 
     if (stringToParse == "=="):
         return (("EQUAL", stringToParse))
