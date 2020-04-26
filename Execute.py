@@ -14,7 +14,7 @@ class enum():
         self.enum_dict["GE"] = lambda a, b: a >= b
         self.enum_dict["SE"] = lambda a, b: a <= b
         self.enum_dict["GREATER"] = lambda a, b: a > b
-        self.enum_dict["SMALLER"] = lambda a, b: a < b
+        self.enum_dict["SMALLER"] = lambda a, b: float(a) < b
         self.enum_dict["IF"] = lambda a, b: self.iffunc(a, b)
         self.enum_dict["WHILE"] = lambda a, b: self.whilefunc(a, b)
         self.enum_dict["VAR"] = lambda a, b: self.variables[a]

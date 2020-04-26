@@ -15,10 +15,6 @@ def findNode(node : Node) -> Union[Node,None]:
         return findNode(node.rhs)
     return None
 
-def createBlock(tokens : List[Token]):
-    nodes = processTokens(tokens[0:-1])
-
-
 class State(Enum):
     Idle = 0
     Math = 1
@@ -30,6 +26,7 @@ class State(Enum):
     WHILE = 8
     WHILE_CONDITION = 9
     WHILE_BLOCK = 10
+    COMPARISON = 11
 
 
 def processMath(tokens: [Token]) -> Node:
@@ -63,27 +60,29 @@ def processMath(tokens: [Token]) -> Node:
                 node_.rhs = new_node
     return current_node
 
-def processComparison(token: Token, current_node) -> Node:
+def processComparison(tokens: List[Token], index : int) -> (Node, State):
 
-    currentToken = token
+    if (index <= -1):
+        return Node(), State.Idle
 
+    current_node, state = processComparison(tokens, index-1)
+    currentToken = tokens[index]
+
+    print(currentToken.instance)
     if (currentToken.instance == "EQUAL" or currentToken.instance == "NOTEQUAL" or currentToken.instance == "GE"
         or currentToken.instance == "SE" or currentToken.instance == "GREATER" or currentToken.instance == "SMALLER"):
-        new_node = Node(currentToken.type, current_node, currentToken.instance)
-        current_node = new_node
+
+        current_node = Node(currentToken.type, current_node, currentToken.instance)
+        new_node, status, unprocessed = processTokens(tokens[0:index])
+        current_node.lhs = new_node[0]
+
+        state = state.COMPARISON
     else:
-        new_node = Node(currentToken.type)
-        # check if list is empty
-        if(current_node.value == None):
-            current_node = new_node
-        else:
-            # get empty node
-            node_ = findNode(current_node)
-            if(node_.lhs == None):
-                node_.lhs = new_node
-            elif (node_.rhs == None):
-                node_.rhs = new_node
-    return current_node
+        if(state == State.COMPARISON):
+            new_node, status, unprocessed = processTokens(tokens[index:])
+            current_node.rhs, = new_node
+            state = State.DONE
+    return current_node, state
 
 
 
@@ -103,14 +102,17 @@ def processIf(tokens: List[Token], index : int) -> ([Node], State):
             nodes.append(Node())
             return nodes, state
         if(currentToken.instance == "RPAREN"):
-            state = State.IF_BLOCK
+
             # set condition node to lhs of if node
-            nodes[-2].lhs = nodes[-1]
+            index_l = [i for i, v in enumerate(tokens) if v.instance == "LPAREN"]
+            index_l = index_l[0]+1
+            compare_node, status = processComparison(tokens[index_l:index], (index - index_l)-1)
+            nodes[-2].lhs = compare_node
             # current node is empty
             nodes[-1] = Node()
+            state = State.IF_BLOCK
             return nodes, state
         else:
-            nodes[-1] = processComparison(currentToken, current_node)
             return nodes, state
 
     if (state == State.IF_BLOCK):
@@ -160,6 +162,10 @@ def processAssign(tokens: List[Token], index : int) -> (Node, State):
 
     return current_node, state
 
+def processVar(token) -> Node:
+    lhs_rhs = Node(token.type)
+    return Node(token.type, lhs_rhs, token.instance, lhs_rhs)
+
 def processWhile(tokens: List[Token], index : int) -> ([Node], State):
     if (index <= -1):
         return [Node()], State.Idle
@@ -176,14 +182,16 @@ def processWhile(tokens: List[Token], index : int) -> ([Node], State):
             nodes.append(Node())
             return nodes, state
         if(currentToken.instance == "RPAREN"):
-            state = State.WHILE_BLOCK
             # set condition node to lhs of if node
-            nodes[-2].lhs = nodes[-1]
+            index_l = [i for i, v in enumerate(tokens) if v.instance == "LPAREN"]
+            index_l = index_l[0] + 1
+            compare_node, status = processComparison(tokens[index_l:index], (index - index_l) - 1)
+            nodes[-2].lhs = compare_node
             # current node is empty
             nodes[-1] = Node()
+            state = State.WHILE_BLOCK
             return nodes, state
         else:
-            nodes[-1] = processComparison(currentToken, current_node)
             return nodes, state
 
     if (state == State.WHILE_BLOCK):
@@ -200,30 +208,31 @@ def processWhile(tokens: List[Token], index : int) -> ([Node], State):
 
 def processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
     if(len(tokens) == 0):
-        return [Node()], State.Idle, []
+        return [], State.Idle, []
 
     nodes, state, unprocessedTokens = processTokens(tokens[0:-1])
     currentToken = tokens[-1]
-    current_node = nodes[-1]
-
-    if(currentToken.instance == "SEMICOLON"):
-        if (state == State.Math):
+    if (state == State.Math):
+        if (currentToken.instance != "NUMBER" and currentToken.instance != "PLUS" and currentToken.instance != "MIN" and
+                    currentToken.instance != "MULTIPLY" and currentToken.instance != "DEVIDED_BY"):
             new_node = processMath(unprocessedTokens)
-            nodes[-1] = (new_node)
-            unprocessedTokens = []
-            return nodes, State.Idle, unprocessedTokens
-
-        if (state == State.ASSIGN):
-            unprocessedTokens.append(currentToken)
-            new_node, state_ = processAssign(unprocessedTokens, len(unprocessedTokens)-1)
             nodes.append(new_node)
             unprocessedTokens = []
-            return nodes, State.Idle, unprocessedTokens
-        if(state != State.Idle):
-            unprocessedTokens.append(currentToken)
-        else:
             state = State.Idle
-            nodes.append(Node())
+        else:
+            unprocessedTokens.append(currentToken)
+        return nodes, state, unprocessedTokens
+
+    elif (state == State.ASSIGN):
+        if(currentToken.instance == "SEMICOLON"):
+            unprocessedTokens.append(currentToken)
+            new_node, state_ = processAssign(unprocessedTokens, len(unprocessedTokens)-1)
+            unprocessedTokens = []
+            nodes.append(new_node)
+            state = State.Idle
+        else:
+            unprocessedTokens.append(currentToken)
+        return nodes, state, unprocessedTokens
 
     elif (state == State.WHILE):
         unprocessedTokens.append(currentToken)
@@ -247,26 +256,23 @@ def processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
 
         return nodes, state, unprocessedTokens
 
-    elif(currentToken.instance == "PLUS" or currentToken.instance == "MIN" or currentToken.instance == "MULTIPLY" or currentToken.instance == "DEVIDED_BY"):
+
+    elif(currentToken.instance == "PLUS" or currentToken.instance == "MIN" or
+                 currentToken.instance == "MULTIPLY" or currentToken.instance == "DEVIDED_BY" or currentToken.instance == "NUMBER"):
         if(state == State.Idle):
             state = State.Math
-        unprocessedTokens.append(currentToken)
 
     elif (currentToken.instance == "ASSIGN"):
-        unprocessedTokens.append(currentToken)
         if (state == State.Idle):
             state = State.ASSIGN
 
     elif(currentToken.instance == "IF"):
-        unprocessedTokens.append(currentToken)
         state = State.IF
 
     elif (currentToken.instance == "WHILE"):
-        unprocessedTokens.append(currentToken)
         state = State.WHILE
 
-    else:
-        unprocessedTokens.append(currentToken)
+    unprocessedTokens.append(currentToken)
 
     return nodes, state, unprocessedTokens
 
@@ -275,7 +281,7 @@ if __name__ == '__main__':
 
     lexer_list = lexer("test.txt")
     print(lexer_list)
-    #tree, state = processIf(lexer_list, len(lexer_list)-1)
+    #tree, state = processComparison(lexer_list, len(lexer_list)-1)
     tree, state, unprocessed = processTokens(lexer_list)
     #tree, state = processAssign(lexer_list, len(lexer_list)-1)
 
