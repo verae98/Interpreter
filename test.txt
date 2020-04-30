@@ -1,7 +1,7 @@
 vera = 8 ;
 test = 0 ;
 while ( vera > 0 ) {
-	if ( vera > 7 ) {
+	if ( vera / 2 == 3 ) {
 		test = test + 1 ;
 	} 
 	vera = vera - 1 ;
