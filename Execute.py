@@ -16,10 +16,10 @@ class enum():
         self.enum_dict["GREATER"] = lambda a, b: a > b
         self.enum_dict["SMALLER"] = lambda a, b: a < b
         self.enum_dict["IF"] = lambda a, b: self.iffunc(a, b)
-        self.enum_dict["WHILE"] = lambda a, b: self.whilefunc(a, b)
+        self.enum_dict["WHILE"] = lambda a, b: self.whilefunc(b)
         self.enum_dict["VAR"] = lambda a, b: self.getvariable(a)
 
-    def whilefunc(self, a, b):
+    def whilefunc(self, b):
         self.AST_to_actions(b)
 
     def getvariable(self, a):
@@ -66,4 +66,4 @@ class enum():
         if(len(nodes) == 0):
             return
         self.AST_to_actions(nodes[0:-1])
-        print(self._loopNode(nodes[-1]))
+        self._loopNode(nodes[-1])

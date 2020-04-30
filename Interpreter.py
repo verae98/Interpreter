@@ -65,7 +65,6 @@ def processComparison(tokens: List[Token], index : int) -> (Node, State):
     current_node, state = processComparison(tokens, index-1)
     currentToken = tokens[index]
 
-    print(currentToken.instance)
     if (currentToken.instance == "EQUAL" or currentToken.instance == "NOTEQUAL" or currentToken.instance == "GE"
         or currentToken.instance == "SE" or currentToken.instance == "GREATER" or currentToken.instance == "SMALLER"):
 
@@ -184,15 +183,19 @@ def processWhile(tokens: List[Token], index : int) -> ([Node], State):
     return nodes, state
 
 def processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
-    print("--------")
-    print(tokens)
     nodes, state, unprocessed = _processTokens(tokens)
-    if(len(nodes) == 0 and len(unprocessed) == 1):
-        nodes.append(processVar(unprocessed[0]))
-    print(state)
-    print(nodes)
-    print("-----------")
     return nodes, state, unprocessed
+
+def amountOpenBraces(tokens: List[Token]) -> int:
+    if(len(tokens) <= 0):
+        return 0
+    braces = amountOpenBraces(tokens[:-1])
+    currentToken = tokens[-1]
+    if(currentToken.instance == "LBRACE"):
+        braces = braces + 1
+    elif(currentToken.instance == "RBRACE"):
+        braces = braces - 1
+    return braces
 
 def _processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
     if(len(tokens) == 0):
@@ -203,7 +206,6 @@ def _processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
     if (state == State.Math):
         if (currentToken.instance == "ASSIGN"):
             state = State.ASSIGN
-            print("override wtih assign")
             # remove incorrect math equation
             nodes = nodes[:-1]
             unprocessedTokens.append(currentToken)
@@ -230,22 +232,30 @@ def _processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
     elif (state == State.WHILE):
         unprocessedTokens.append(currentToken)
         if (currentToken.instance == "RBRACE"):
-            new_node, status_while = processWhile(unprocessedTokens, len(unprocessedTokens) - 1)
-            nodes.append(new_node[0])
-            unprocessedTokens = []
-            state = State.Idle
-            nodes.append(Node())
+            amountBraces = amountOpenBraces(unprocessedTokens)
+            if(amountBraces == 0):
+                new_node, status_while = processWhile(unprocessedTokens, len(unprocessedTokens) - 1)
+                nodes.append(new_node[0])
+                unprocessedTokens = []
+                state = State.Idle
+                nodes.append(Node())
+            elif(amountBraces < 0):
+                print("error braces not correct")
 
         return nodes, state, unprocessedTokens
 
     elif(state == State.IF):
         unprocessedTokens.append(currentToken)
         if(currentToken.instance == "RBRACE"):
-            new_node, status_if = processIf(unprocessedTokens, len(unprocessedTokens)-1)
-            nodes.append(new_node[0])
-            unprocessedTokens = []
-            state = State.Idle
-            nodes.append(Node())
+            amountBraces = amountOpenBraces(unprocessedTokens)
+            if (amountBraces == 0):
+                new_node, status_if = processIf(unprocessedTokens, len(unprocessedTokens)-1)
+                nodes.append(new_node[0])
+                unprocessedTokens = []
+                state = State.Idle
+                nodes.append(Node())
+            elif (amountBraces < 0):
+                print("error braces not correct")
 
         return nodes, state, unprocessedTokens
 
@@ -265,11 +275,8 @@ def _processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
             state = State.ASSIGN
         if (state == State.Math):
             state = State.ASSIGN
-            print("override wtih assign")
-            # remove incorrect math equation
-            print(nodes)
+            # remove incorrect and unfinished math equation
             nodes = nodes[:-1]
-            print(nodes)
 
 
     elif(currentToken.instance == "IF"):

@@ -1,8 +1,8 @@
 vera = 8 ;
 test = 0 ;
 while ( vera > 0 ) {
-	vera = vera - 1 ;
-	if(vera > 3) {
+	if ( vera > 7 ) {
 		test = test + 1 ;
 	} 
+	vera = vera - 1 ;
 }
