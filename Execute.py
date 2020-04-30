@@ -4,24 +4,26 @@ class enum():
     def __init__(self):
         self.variables = {}
         self.enum_dict = {}
-        self.enum_dict["PLUS"] = lambda a, b : float(a) + float(b)
-        self.enum_dict["MIN"] = lambda a, b: float(a) - float(b)
-        self.enum_dict["MULTIPLY"] = lambda a, b: float(a) * float(b)
-        self.enum_dict["DEVIDED_BY"] = lambda a, b: float(a) / float(b)
+        self.enum_dict["PLUS"] = lambda a, b : a + b
+        self.enum_dict["MIN"] = lambda a, b: a - b
+        self.enum_dict["MULTIPLY"] = lambda a, b: a * b
+        self.enum_dict["DEVIDED_BY"] = lambda a, b: a / b
         self.enum_dict["ASSIGN"] = lambda d, key, value: d.update({key:value})
         self.enum_dict["EQUAL"] = lambda a, b : a == b
         self.enum_dict["NOTEQUAL"] = lambda a, b: a != b
         self.enum_dict["GE"] = lambda a, b: a >= b
         self.enum_dict["SE"] = lambda a, b: a <= b
         self.enum_dict["GREATER"] = lambda a, b: a > b
-        self.enum_dict["SMALLER"] = lambda a, b: float(a) < b
+        self.enum_dict["SMALLER"] = lambda a, b: a < b
         self.enum_dict["IF"] = lambda a, b: self.iffunc(a, b)
         self.enum_dict["WHILE"] = lambda a, b: self.whilefunc(a, b)
-        self.enum_dict["VAR"] = lambda a, b: self.variables[a]
+        self.enum_dict["VAR"] = lambda a, b: self.getvariable(a)
 
     def whilefunc(self, a, b):
-        while(a):
-            self.AST_to_actions(b)
+        self.AST_to_actions(b)
+
+    def getvariable(self, a):
+        return self.variables[a]
 
     def iffunc(self, a, b):
         if(a):
@@ -33,6 +35,20 @@ class enum():
         return self.enum_dict[key](*arg)
 
     def _loopNode(self, node):
+
+        if(node.operator == "NUMBER"):
+            return float(node.value)
+        if(node.operator == "VAR"):
+            return self.variables[node.value]
+        if(node.operator == "WHILE"):
+            if (node.lhs != None):
+                left = self._loopNode(node.lhs)
+                while (left):
+                    self.execute(str(node.operator), (left, node.rhs))
+                    left = self._loopNode(node.lhs)
+
+            return
+
         if(node.lhs == None and node.rhs == None):
             return node.value
         left = None

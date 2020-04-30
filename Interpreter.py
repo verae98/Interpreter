@@ -29,25 +29,22 @@ class State(Enum):
     COMPARISON = 11
 
 
-def processMath(tokens: [Token]) -> Node:
-    if (len(tokens) == 0):
-        return Node()
-    nodes = processMath(tokens[0:-1])
-    currentToken = tokens[-1]
-    current_node = nodes
+def processMath(token: Token, current_node : Node) -> Node:
+    currentToken = token
 
     if (currentToken.instance == "PLUS" or currentToken.instance == "MIN"):
         new_node = Node(currentToken.type, current_node, currentToken.instance)
         current_node = new_node
     elif (currentToken.instance == "MULTIPLY" or currentToken.instance == "DEVIDED_BY"):
         node_ = findNode(current_node)
-        new_node = Node(node_.value)
+        new_node = Node(node_.value, None, node_.operator)
         node_.value = currentToken.type
         node_.operator = currentToken.instance
         node_.lhs = new_node
 
+
     else:
-        new_node = Node(currentToken.type)
+        new_node = Node(currentToken.type, None, currentToken.instance)
         # check if list is empty
         if(current_node.value == None):
             current_node = new_node
@@ -146,41 +143,27 @@ def processAssign(tokens: List[Token], index : int) -> (Node, State):
     elif (currentToken.instance == "ASSIGN"):
         current_node = Node(currentToken.type, current_node, currentToken.instance)
         state = State.ASSIGN
-    else:
-        new_node = Node(currentToken.type)
-        # check if list is empty
-        if (current_node.value == None):
-            current_node = new_node
-        else:
-            # get empty node
-            time.sleep(1)
-            node_ = findNode(current_node)
-            if (node_.lhs == None):
-                node_.lhs = new_node
-            elif (node_.rhs == None):
-                node_.rhs = new_node
+        lhs_node = Node(tokens[index-1].type)
+        current_node.lhs = lhs_node
 
     return current_node, state
 
 def processVar(token) -> Node:
-    lhs_rhs = Node(token.type)
-    return Node(token.type, lhs_rhs, token.instance, lhs_rhs)
+    return Node(token.type, None, token.instance)
 
 def processWhile(tokens: List[Token], index : int) -> ([Node], State):
     if (index <= -1):
         return [Node()], State.Idle
     nodes, state = processWhile(tokens, index-1)
     currentToken = tokens[index]
-    current_node = nodes[-1]
 
     if (currentToken.instance == "WHILE"):
         new_node = Node(currentToken.type, None, currentToken.instance)
         nodes[-1] = new_node
         return nodes , State.WHILE_CONDITION
-    if (state == State.WHILE_CONDITION):
+    elif (state == State.WHILE_CONDITION):
         if (currentToken.instance == "LPAREN"):
             nodes.append(Node())
-            return nodes, state
         if(currentToken.instance == "RPAREN"):
             # set condition node to lhs of if node
             index_l = [i for i, v in enumerate(tokens) if v.instance == "LPAREN"]
@@ -190,37 +173,47 @@ def processWhile(tokens: List[Token], index : int) -> ([Node], State):
             # current node is empty
             nodes[-1] = Node()
             state = State.WHILE_BLOCK
-            return nodes, state
-        else:
-            return nodes, state
 
-    if (state == State.WHILE_BLOCK):
+    elif (state == State.WHILE_BLOCK):
         if (currentToken.instance == "LBRACE"):
             nodes.append(Node())
             in_braces, state, unprocessed = processTokens(tokens[index+1:-1])
             nodes[0].rhs = in_braces
             state = State.DONE
-            return nodes, state
-        if (currentToken.instance == "RPAREN"):
-            return nodes, state
 
     return nodes, state
 
 def processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
+    print("--------")
+    print(tokens)
+    nodes, state, unprocessed = _processTokens(tokens)
+    if(len(nodes) == 0 and len(unprocessed) == 1):
+        nodes.append(processVar(unprocessed[0]))
+    print(state)
+    print(nodes)
+    print("-----------")
+    return nodes, state, unprocessed
+
+def _processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
     if(len(tokens) == 0):
         return [], State.Idle, []
 
-    nodes, state, unprocessedTokens = processTokens(tokens[0:-1])
+    nodes, state, unprocessedTokens = _processTokens(tokens[0:-1])
     currentToken = tokens[-1]
     if (state == State.Math):
-        if (currentToken.instance != "NUMBER" and currentToken.instance != "PLUS" and currentToken.instance != "MIN" and
+        if (currentToken.instance == "ASSIGN"):
+            state = State.ASSIGN
+            print("override wtih assign")
+            # remove incorrect math equation
+            nodes = nodes[:-1]
+            unprocessedTokens.append(currentToken)
+        elif (currentToken.instance != "NUMBER" and currentToken.instance != "VAR" and currentToken.instance != "PLUS" and currentToken.instance != "MIN" and
                     currentToken.instance != "MULTIPLY" and currentToken.instance != "DEVIDED_BY"):
-            new_node = processMath(unprocessedTokens)
-            nodes.append(new_node)
             unprocessedTokens = []
             state = State.Idle
         else:
             unprocessedTokens.append(currentToken)
+            nodes[-1] = processMath(currentToken, nodes[-1])
         return nodes, state, unprocessedTokens
 
     elif (state == State.ASSIGN):
@@ -258,13 +251,26 @@ def processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
 
 
     elif(currentToken.instance == "PLUS" or currentToken.instance == "MIN" or
-                 currentToken.instance == "MULTIPLY" or currentToken.instance == "DEVIDED_BY" or currentToken.instance == "NUMBER"):
+                 currentToken.instance == "MULTIPLY" or currentToken.instance == "DEVIDED_BY" or currentToken.instance == "NUMBER" or currentToken.instance == "VAR"):
         if(state == State.Idle):
             state = State.Math
+            nodes.append(Node())
+            if (len(unprocessedTokens) < 0):
+                nodes[-1] = processMath(unprocessedTokens[0], nodes[-1])
+            nodes[-1] = processMath(currentToken, nodes[-1])
+
 
     elif (currentToken.instance == "ASSIGN"):
         if (state == State.Idle):
             state = State.ASSIGN
+        if (state == State.Math):
+            state = State.ASSIGN
+            print("override wtih assign")
+            # remove incorrect math equation
+            print(nodes)
+            nodes = nodes[:-1]
+            print(nodes)
+
 
     elif(currentToken.instance == "IF"):
         state = State.IF
