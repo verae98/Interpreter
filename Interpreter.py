@@ -8,7 +8,7 @@ import time
 
 if __name__ == '__main__':
 
-    lexer_list, errornr = lexer("test.txt")
+    lexer_list, errornr = lexer("t4est.txt")
     if(errornr.nr == Errornr.NO_ERROR):
         print(lexer_list)
         tree, state, unprocessed = parse(lexer_list)
@@ -22,6 +22,5 @@ if __name__ == '__main__':
         print(exec.variables)
 
     else:
-        print("Error: ")
-        print(errornr.nr)
-        print(errornr.msg)
+        print("Whoops: ")
+        print(errornr)

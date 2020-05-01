@@ -18,13 +18,13 @@ class enum():
         self.enum_dict["SMALLER"] = lambda a, b: a < b
         self.enum_dict["IF"] = lambda a, b: self.iffunc(a, b)
         self.enum_dict["WHILE"] = lambda a, b: self.whilefunc(a,b)
-        self.enum_dict["VAR"] = lambda a, b: self.getvariable(a)
+        self.enum_dict["VAR"] = lambda a, b: self.getVariable(a)
 
     def whilefunc(self, a, b):
         while(self.AST_to_actions(a)):
             self.AST_to_actions(b)
 
-    def getvariable(self, a):
+    def getVariable(self, a):
         return self.variables[a]
 
     def iffunc(self, a, b):

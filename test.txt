@@ -1,6 +1,6 @@
 vera = 8 ;
 test = 0 ;
-while ( vera > 0 ) {
+while ( vera > 2 ) {
 	if ( vera / 2 == 3 ) {
 		test = test + 1 ;
 	} 

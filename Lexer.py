@@ -1,6 +1,18 @@
 import re
-from typing import List, Tuple
+import os
+from typing import List, Tuple, Callable, Union
 from Enums import Error, Errornr
+
+class Token():
+    def __init__(self, instance : Tuple[str,str]): # ("PLUS", "+")
+        self.instance = instance[0]
+        self.type = instance[1]
+
+    def __str__(self) -> str:
+        return (self.instance + " -> " + self.type)
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 def returnTupleFromString(stringToParse : str) -> (Tuple[str, str], Error):
 
@@ -59,48 +71,46 @@ def returnTupleFromString(stringToParse : str) -> (Tuple[str, str], Error):
 def fileToWordlist(string_file : str) -> List[str]:
     if(len(string_file) <= 0):
         return [""]
-    current_wordlist = fileToWordlist(string_file[1:])
-    if(string_file[0] == ' ' or string_file[0] == '\t' or string_file[0] == '\n' or string_file[0] == '\r'):
+    head = string_file[0]
+    tail = string_file[1:]
+    current_wordlist = fileToWordlist(tail)
+    if(head == ' ' or head == '\t' or head == '\n' or head == '\r'):
         current_wordlist = [""] + current_wordlist
 
     else:
-        new_word = string_file[0] + current_wordlist[0]
+        # update first word in the wordlist
+        new_word = head + current_wordlist[0]
         current_wordlist[0] = new_word
 
     return current_wordlist
 
-def wordlistToTokens(wordlist : List[str]) -> (List[Tuple[str, str]], Error):
+# TODO: implements ZipWith
+def wordlistToTokens(f : Callable, wordlist : List[str]) -> (List[Tuple[str, str]], Error):
     if(len(wordlist) == 0):
         return [], Error(Errornr.NO_ERROR, "")
-    currentTokenlist, errornr = wordlistToTokens(wordlist[1:])
-    if(errornr.nr == Errornr.NO_ERROR):
-        word_to_parse = wordlist[0]
+    head, *tail = wordlist
+    currentTokenlist, errornr = wordlistToTokens(f,tail)
+    # removes tabs /r or double spaces
+    word_to_parse = head.strip()
+    # if error has occured or word is empty, dont change anything
+    if(errornr.nr != Errornr.NO_ERROR or len(word_to_parse) == 0):
+        return currentTokenlist, errornr
+    # parse word and retieve tuple and errornr
+    new_tuple, errornr = f(word_to_parse)
+    return (([Token(new_tuple)] + currentTokenlist), errornr)
 
-        # remove /n /r or double spaces
-        word_to_parse = word_to_parse.strip()
-        if(len(word_to_parse) == 0):
-            return currentTokenlist, errornr
 
-        new_tuple, errornr = returnTupleFromString(wordlist[0])
-        return (([Token(new_tuple)] + currentTokenlist), errornr)
-    return currentTokenlist, errornr
+def readFromFile(filename : str) -> Union[str, None]:
+    if(os.access(filename, os.R_OK)):
+        f = open(filename, "r")
+        return f.read()
+    return None
 
-def readFromFile(filename : str) -> str:
-    f = open(filename, "r")
-    return f.read()
+def lexer(filename : str) -> Union[Tuple[List[Token], Error], Tuple[None, Error]]:
+    fileContainer = readFromFile(filename)
+    if(fileContainer != None):
+        wordlist = fileToWordlist(fileContainer)
+        tokenlist, errornr = wordlistToTokens(returnTupleFromString, wordlist)
+        return tokenlist, errornr
+    return None, Error(Errornr.FileNotFoundError, "Cannot open " + filename)
 
-def lexer(filename):
-    wordlist = fileToWordlist(readFromFile(filename))
-    tokenlist, errornr = wordlistToTokens(wordlist)
-    return tokenlist, errornr
-
-class Token():
-    def __init__(self, instance : Tuple[str,str]): # ("PLUS", "+")
-        self.instance = instance[0]
-        self.type = instance[1]
-
-    def __str__(self) -> str:
-        return (self.instance + " -> " + self.type)
-
-    def __repr__(self) -> str:
-        return self.__str__()

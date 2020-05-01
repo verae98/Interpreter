@@ -305,10 +305,6 @@ def _processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
     elif (currentToken.instance == "ASSIGN"):
         if (state == State.Idle):
             state = State.ASSIGN
-        if (state == State.Math):
-            state = State.ASSIGN
-            # remove incorrect and unfinished math equation
-            nodes = nodes[:-1]
 
 
     elif(currentToken.instance == "IF"):
