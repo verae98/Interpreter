@@ -6,3 +6,6 @@ while ( vera > 2 ) {
 	} 
 	vera = vera - 1 ;
 }
+if ( vera > 0 ) {
+   geslaagd = 1 ;
+}

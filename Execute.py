@@ -1,5 +1,5 @@
-from typing import Tuple
-from Parser import operator_node, value_node
+from typing import Tuple, List
+from Parser import Node, operator_node, value_node
 
 class enum():
     def __init__(self):
@@ -20,14 +20,14 @@ class enum():
         self.enum_dict["WHILE"] = lambda a, b: self.whilefunc(a,b)
         self.enum_dict["VAR"] = lambda a, b: self.getVariable(a)
 
-    def whilefunc(self, a, b):
+    def whilefunc(self, a : List[Node], b : List[Node]):
         while(self.AST_to_actions(a)):
             self.AST_to_actions(b)
 
-    def getVariable(self, a):
+    def getVariable(self, a : str):
         return self.variables[a]
 
-    def iffunc(self, a, b):
+    def iffunc(self, a : bool, b : List[Node]):
         if(a):
             self.AST_to_actions(b)
 
@@ -36,7 +36,7 @@ class enum():
             return self.enum_dict[key](*(self.variables, *(arg)))
         return self.enum_dict[key](*arg)
 
-    def _loopNode(self, node):
+    def _loopNode(self, node : Node):
 
         if(isinstance(node, value_node)):
             if (node.type == "NUMBER"):
@@ -62,7 +62,7 @@ class enum():
                 right = node.rhs
             return self.execute(str(node.operator), (left, right))
 
-    def AST_to_actions(self, nodes):
+    def AST_to_actions(self, nodes : List[Node]):
         if(len(nodes) == 0):
             return
         self.AST_to_actions(nodes[0:-1])

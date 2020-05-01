@@ -4,35 +4,35 @@ from Enums import Error, Errornr, State
 
 class Node():
 
-    def __init__(self, value = None, type = None):
+    def __init__(self, value : str = None, type : str = None):
         self.value = value
         self.type = type
 
-    def __str__(self):
+    def __str__(self) -> str:
         return ("(value: " + (" None " if self.value is None else self.value) + " Type: " + (
         " None " if self.type is None else self.type) + ")\n")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
 class operator_node(Node):
 
-    def __init__(self, value = None, lhs = None, operator = None, rhs = None):
+    def __init__(self, value : str = None , lhs : Node = None , operator : str = None, rhs : Node = None):
         Node.__init__(self, value, operator)
         self.value = value
         self.lhs = lhs
         self.operator = operator
         self.rhs = rhs
 
-    def __str__(self):
+    def __str__(self) -> str:
         return ("(value: " + (" None " if self.value is None else self.value) + " lhs: " + (" None " if self.lhs is None else self.lhs.__repr__())
                 + " operator: " + (" None " if self.operator is None else self.operator) + " rhs: " + (" None " if self.rhs is None else self.rhs.__repr__()) + ")\n")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
 class value_node(Node):
-    def __init__(self, value = None, type = None):
+    def __init__(self, value : str = None, type : str = None):
         Node.__init__(self, value, type)
         self.value = value
         self.type = type
@@ -179,7 +179,7 @@ def processAssign(tokens: List[Token], index : int) -> (Node, State):
 
     return current_node, state
 
-def processVar(token) -> Node:
+def processVar(token : Token) -> Node:
     return value_node(token.type, token.instance)
 
 def processWhile(tokens: List[Token], index : int) -> ([Node], State):
