@@ -5,7 +5,7 @@ class Errornr(Enum):
     SYNTAX_ERROR = 1
 
 class Error():
-    def __init__(self, errornr, errormsg):
+    def __init__(self, errornr, errormsg = ""):
         self.nr = errornr
         self.msg = errormsg
 

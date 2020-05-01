@@ -5,54 +5,54 @@ from Enums import Error, Errornr
 def returnTupleFromString(stringToParse : str) -> (Tuple[str, str], Error):
 
     if (stringToParse == "+"):
-        return (("PLUS", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("PLUS", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == "-"):
-        return (("MIN", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("MIN", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == "*"):
-        return (("MULTIPLY", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("MULTIPLY", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == "/"):
-        return (("DEVIDED_BY", stringToParse),Error(Errornr.NO_ERROR, ""))
+        return (("DEVIDED_BY", stringToParse),Error(Errornr.NO_ERROR))
     if (stringToParse.isnumeric() or (stringToParse[0] == "-" and stringToParse[1:].isnumeric())):
-        return (("NUMBER", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("NUMBER", stringToParse), Error(Errornr.NO_ERROR))
     if(stringToParse == "if"):
-        return (("IF", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("IF", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == "else"):
-        return (("ELSE", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("ELSE", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == "="):
-        return (("ASSIGN", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("ASSIGN", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == "while"):
-        return (("WHILE", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("WHILE", stringToParse), Error(Errornr.NO_ERROR))
 
     if (stringToParse == "=="):
-        return (("EQUAL", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("EQUAL", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == "!="):
-        return (("NOTEQUAL", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("NOTEQUAL", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == ">="):
-        return (("GE", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("GE", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == "<="):
-        return (("SE", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("SE", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == ">"):
-        return (("GREATER", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("GREATER", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == "<"):
-        return (("SMALLER", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("SMALLER", stringToParse), Error(Errornr.NO_ERROR))
 
     if (stringToParse == ";"):
-        return (("SEMICOLON", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("SEMICOLON", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == "("):
-        return (("LPAREN", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("LPAREN", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == ")"):
-        return (("RPAREN", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("RPAREN", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == "{"):
-        return (("LBRACE", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("LBRACE", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == "}"):
-        return (("RBRACE", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("RBRACE", stringToParse), Error(Errornr.NO_ERROR))
     if (stringToParse == "print"):
-        return (("PRINT", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("PRINT", stringToParse), Error(Errornr.NO_ERROR))
     if (re.fullmatch("^[a-zA-Z_][a-zA-Z0-9_]*", stringToParse)):
-        return (("VAR", stringToParse), Error(Errornr.NO_ERROR, ""))
+        return (("VAR", stringToParse), Error(Errornr.NO_ERROR))
 
     else:
-        errormsg = "CANNOT DEFINE: " + stringToParse
+        errormsg = "CANNOT DEFINE: " + "\"" + stringToParse + "\""
         return (("ERROR", errormsg), Error(Errornr.SYNTAX_ERROR, errormsg))
 
 
@@ -73,7 +73,6 @@ def wordlistToTokens(wordlist : List[str]) -> (List[Tuple[str, str]], Error):
     if(len(wordlist) == 0):
         return [], Error(Errornr.NO_ERROR, "")
     currentTokenlist, errornr = wordlistToTokens(wordlist[1:])
-    new_tuple = None
     if(errornr.nr == Errornr.NO_ERROR):
         word_to_parse = wordlist[0]
 
@@ -100,8 +99,8 @@ class Token():
         self.instance = instance[0]
         self.type = instance[1]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (self.instance + " -> " + self.type)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
