@@ -84,7 +84,7 @@ def fileToWordlist(string_file : str) -> List[str]:
 
     return current_wordlist
 
-# TODO: implements ZipWith
+# TODO: implements map
 def wordlistToTokens(f : Callable, wordlist : List[str]) -> (List[Tuple[str, str]], Error):
     if(len(wordlist) == 0):
         return [], Error(Errornr.NO_ERROR, "")

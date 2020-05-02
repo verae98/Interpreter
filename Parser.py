@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Callable
 from Lexer import Token
 from Enums import Error, Errornr, State
 
@@ -132,8 +132,9 @@ def processIf(tokens: List[Token], index : int) -> ([Node], State):
         if(currentToken.instance == "RPAREN"):
 
             # set condition node to lhs of if node
-            index_l = [i for i, v in enumerate(tokens) if v.instance == "LPAREN"]
-            index_l = index_l[0]+1
+            # get index of the start of the condition
+            index_l = getIndexToken(lambda x: x.instance == "LPAREN", tokens)
+            index_l = index_l + 1
             compare_node, status = processComparison(tokens[index_l:index], (index - index_l)-1)
             nodes[-2].lhs = compare_node
             # current node is empty
@@ -182,6 +183,21 @@ def processAssign(tokens: List[Token], index : int) -> (Node, State):
 def processVar(token : Token) -> Node:
     return value_node(token.type, token.instance)
 
+def _getFirst(list_to_check : List[bool]) -> int:
+    if(len(list_to_check) == 0):
+        return -1
+    index = _getFirst(list_to_check[:-1])
+    if(list_to_check[-1] and index == -1):
+        return len(list_to_check) -1
+    return index
+
+def getIndexToken(f : Callable[[Token], bool], tokens : List[Token]) -> [int] :
+    print(tokens)
+    int_list = map(f, tokens)
+   # convert map to list
+    return _getFirst(list(int_list))
+
+
 def processWhile(tokens: List[Token], index : int) -> ([Node], State):
     if (index <= -1):
         return [Node()], State.Idle
@@ -197,8 +213,8 @@ def processWhile(tokens: List[Token], index : int) -> ([Node], State):
             nodes.append(Node())
         if(currentToken.instance == "RPAREN"):
             # set condition node to lhs of if node
-            index_l = [i for i, v in enumerate(tokens) if v.instance == "LPAREN"]
-            index_l = index_l[0] + 1
+            index_l = getIndexToken(lambda x: x.instance == "LPAREN", tokens)
+            index_l = index_l + 1
             compare_node, status = processComparison(tokens[index_l:index], (index - index_l) - 1)
             nodes[-2].lhs = compare_node
             # current node is empty
