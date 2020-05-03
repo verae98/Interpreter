@@ -22,6 +22,16 @@ Translation table
 | Left bracet | fa_inizio | Italian | 
 | Right bracet | fa_fine | Italian | 
 
+## Errorhandling
+
+## Features
+
+## Used high order functions 
+
+## Inheritance 
+
+## Link to instruction video
+
 
 ## Example
 Below is shown an example of the ves++ code. This has been translated to pseudo code (based on c++) to give an impression of how the code works 
