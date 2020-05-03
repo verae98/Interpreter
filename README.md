@@ -1,7 +1,7 @@
 # Interpreter
 ### The language for everybody, yet nobody
-The idea behind this language is include the most common languages from west-europe (and for some random reason I have added the turkish language).
-This way everybody understands a part of the code, yet (probably) not everything. In my opinion it is a fun way to get involved with other languages!
+This language has included the most common languages from west-europe (and for some random reason I have added the turkish language).
+This way many understands a part of the code, yet (probably) not everything. In my opinion it is a fun way to get involved with other languages!
 
 Translation table
 |Type| Word in this language | Language where it comes from
