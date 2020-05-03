@@ -1,17 +1,17 @@
 from enum import Enum
 
 class Errornr(Enum):
-    NO_ERROR = 0
-    SYNTAX_ERROR = 1
-    FileNotFoundError = 2
+    NO_ERROR = "No Error"
+    SYNTAX_ERROR = "Syntax Error"
+    FileNotFoundError = "File Not Found Error"
 
 class Error():
-    def __init__(self, errornr, errormsg = ""):
+    def __init__(self, errornr : Errornr, errormsg = ""):
         self.nr = errornr
         self.msg = errormsg
 
     def __str__(self):
-        return (str(self.nr) + ": " + self.msg)
+        return (str(self.nr.value) + ": " + self.msg)
 
     def __repr__(self):
         return self.__str__()

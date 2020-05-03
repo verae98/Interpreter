@@ -2,6 +2,7 @@ import re
 import os
 from typing import List, Tuple, Callable, Union
 from Enums import Error, Errornr
+from functools import reduce
 
 class Token():
     def __init__(self, instance : Tuple[str,str]): # ("PLUS", "+")
@@ -14,66 +15,121 @@ class Token():
     def __repr__(self) -> str:
         return self.__str__()
 
-def returnTupleFromString(stringToParse : str) -> (Tuple[str, str], Error):
-
-    if (stringToParse == "+"):
-        return (("PLUS", stringToParse), Error(Errornr.NO_ERROR))
-    if (stringToParse == "-"):
-        return (("MIN", stringToParse), Error(Errornr.NO_ERROR))
-    if (stringToParse == "*"):
-        return (("MULTIPLY", stringToParse), Error(Errornr.NO_ERROR))
-    if (stringToParse == "/"):
-        return (("DEVIDED_BY", stringToParse),Error(Errornr.NO_ERROR))
+def new_returnTupleFromString(stringToParse : str) -> (Tuple[str, str]):
+    if (stringToParse == "mas"):
+        return (("PLUS", stringToParse))
+    if (stringToParse == "eksi"):
+        return (("MIN", stringToParse))
+    if (stringToParse == "vezes"):
+        return (("MULTIPLY", stringToParse))
+    if (stringToParse == "dela"):
+        return (("DEVIDED_BY", stringToParse))
     if (stringToParse.isnumeric() or (stringToParse[0] == "-" and stringToParse[1:].isnumeric())):
-        return (("NUMBER", stringToParse), Error(Errornr.NO_ERROR))
-    if(stringToParse == "if"):
-        return (("IF", stringToParse), Error(Errornr.NO_ERROR))
-    if (stringToParse == "else"):
-        return (("ELSE", stringToParse), Error(Errornr.NO_ERROR))
-    if (stringToParse == "="):
-        return (("ASSIGN", stringToParse), Error(Errornr.NO_ERROR))
-    if (stringToParse == "while"):
-        return (("WHILE", stringToParse), Error(Errornr.NO_ERROR))
+        return (("NUMBER", stringToParse))
+    if(stringToParse == "ef"):
+        return (("IF", stringToParse))
+    if (stringToParse == "annars"):
+        return (("ELSE", stringToParse))
+    if (stringToParse == "er"):
+        return (("ASSIGN", stringToParse))
+    if (stringToParse == "aika"):
+        return (("WHILE", stringToParse))
 
-    if (stringToParse == "=="):
-        return (("EQUAL", stringToParse), Error(Errornr.NO_ERROR))
-    if (stringToParse == "!="):
-        return (("NOTEQUAL", stringToParse), Error(Errornr.NO_ERROR))
+    if (stringToParse == "lig"):
+        return (("EQUAL", stringToParse))
+    if (stringToParse == "unterschiedlich"):
+        return (("NOTEQUAL", stringToParse))
     if (stringToParse == ">="):
-        return (("GE", stringToParse), Error(Errornr.NO_ERROR))
+        return (("GE", stringToParse))
     if (stringToParse == "<="):
-        return (("SE", stringToParse), Error(Errornr.NO_ERROR))
+        return (("SE", stringToParse))
     if (stringToParse == ">"):
-        return (("GREATER", stringToParse), Error(Errornr.NO_ERROR))
+        return (("GREATER", stringToParse))
     if (stringToParse == "<"):
-        return (("SMALLER", stringToParse), Error(Errornr.NO_ERROR))
+        return (("SMALLER", stringToParse))
 
-    if (stringToParse == ";"):
-        return (("SEMICOLON", stringToParse), Error(Errornr.NO_ERROR))
-    if (stringToParse == "("):
-        return (("LPAREN", stringToParse), Error(Errornr.NO_ERROR))
-    if (stringToParse == ")"):
-        return (("RPAREN", stringToParse), Error(Errornr.NO_ERROR))
-    if (stringToParse == "{"):
-        return (("LBRACE", stringToParse), Error(Errornr.NO_ERROR))
-    if (stringToParse == "}"):
-        return (("RBRACE", stringToParse), Error(Errornr.NO_ERROR))
+    if (stringToParse == "fin"):
+        return (("SEMICOLON", stringToParse))
+    if (stringToParse == "haakje_begin"):
+        return (("LPAREN", stringToParse))
+    if (stringToParse == "haakje_eind"):
+        return (("RPAREN", stringToParse))
+    if (stringToParse == "fa_inizio"):
+        return (("LBRACE", stringToParse))
+    if (stringToParse == "fa_fine"):
+        return (("RBRACE", stringToParse))
     if (stringToParse == "print"):
-        return (("PRINT", stringToParse), Error(Errornr.NO_ERROR))
-    if (re.fullmatch("^[a-zA-Z_][a-zA-Z0-9_]*", stringToParse)):
-        return (("VAR", stringToParse), Error(Errornr.NO_ERROR))
+        return (("PRINT", stringToParse))
+    if (re.fullmatch("^[@][a-zA-Z0-9_]*", stringToParse)):
+        return (("VAR", stringToParse))
 
     else:
-        errormsg = "CANNOT DEFINE: " + "\"" + stringToParse + "\""
-        return (("ERROR", errormsg), Error(Errornr.SYNTAX_ERROR, errormsg))
+        return (("ERROR", stringToParse))
 
+def returnTupleFromString(stringToParse : str) -> (Tuple[str, str]):
+
+    if (stringToParse == "+"):
+        return (("PLUS", stringToParse))
+    if (stringToParse == "-"):
+        return (("MIN", stringToParse))
+    if (stringToParse == "*"):
+        return (("MULTIPLY", stringToParse))
+    if (stringToParse == "/"):
+        return (("DEVIDED_BY", stringToParse))
+    if (stringToParse.isnumeric() or (stringToParse[0] == "-" and stringToParse[1:].isnumeric())):
+        return (("NUMBER", stringToParse))
+    if(stringToParse == "if"):
+        return (("IF", stringToParse))
+    if (stringToParse == "else"):
+        return (("ELSE", stringToParse))
+    if (stringToParse == "="):
+        return (("ASSIGN", stringToParse))
+    if (stringToParse == "while"):
+        return (("WHILE", stringToParse))
+
+    if (stringToParse == "=="):
+        return (("EQUAL", stringToParse))
+    if (stringToParse == "!="):
+        return (("NOTEQUAL", stringToParse))
+    if (stringToParse == ">="):
+        return (("GE", stringToParse))
+    if (stringToParse == "<="):
+        return (("SE", stringToParse))
+    if (stringToParse == ">"):
+        return (("GREATER", stringToParse))
+    if (stringToParse == "<"):
+        return (("SMALLER", stringToParse))
+
+    if (stringToParse == ";"):
+        return (("SEMICOLON", stringToParse))
+    if (stringToParse == "("):
+        return (("LPAREN", stringToParse))
+    if (stringToParse == ")"):
+        return (("RPAREN", stringToParse))
+    if (stringToParse == "{"):
+        return (("LBRACE", stringToParse))
+    if (stringToParse == "}"):
+        return (("RBRACE", stringToParse))
+    if (stringToParse == "print"):
+        return (("PRINT", stringToParse))
+    if (re.fullmatch("^[a-zA-Z_][a-zA-Z0-9_]*", stringToParse)):
+        return (("VAR", stringToParse))
+
+    else:
+        return (("ERROR", stringToParse))
 
 def fileToWordlist(string_file : str) -> List[str]:
+    wordlist = createWordlist(string_file)
+    wordlist = filter((lambda x: x != ' ' and x != '\t' and x != '\n' and x != '\r' and x != ''), wordlist)
+    wordlist = list(wordlist)
+    return wordlist
+
+def createWordlist(string_file : str) -> List[str]:
     if(len(string_file) <= 0):
         return [""]
     head = string_file[0]
     tail = string_file[1:]
-    current_wordlist = fileToWordlist(tail)
+    current_wordlist = createWordlist(tail)
     if(head == ' ' or head == '\t' or head == '\n' or head == '\r'):
         current_wordlist = [""] + current_wordlist
 
@@ -84,21 +140,20 @@ def fileToWordlist(string_file : str) -> List[str]:
 
     return current_wordlist
 
-# TODO: implements map
-def wordlistToTokens(f : Callable, wordlist : List[str]) -> (List[Tuple[str, str]], Error):
-    if(len(wordlist) == 0):
-        return [], Error(Errornr.NO_ERROR, "")
-    head, *tail = wordlist
-    currentTokenlist, errornr = wordlistToTokens(f,tail)
-    # removes tabs /r or double spaces
-    word_to_parse = head.strip()
-    # if error has occured or word is empty, dont change anything
-    if(errornr.nr != Errornr.NO_ERROR or len(word_to_parse) == 0):
-        return currentTokenlist, errornr
-    # parse word and retieve tuple and errornr
-    new_tuple, errornr = f(word_to_parse)
-    return (([Token(new_tuple)] + currentTokenlist), errornr)
+def foldl(f: Callable, base, list):
+    if(len(list) == 0):
+        return base
+    head, *tail = list
+    return (f(head, foldl(f, base, tail)))
 
+def wordlistToTokens(f : Callable, wordlist : List[str]) -> (List[Tuple[str, str]], Error):
+    error = Error(Errornr.NO_ERROR)
+    reduce_list = foldl(f, [], wordlist)
+    errorlist = list(filter(lambda x: x.instance == "ERROR", reduce_list))
+    if(len(errorlist) > 0):
+        text = "Cannot define " + " \"" + errorlist[0].type + "\" " +  " "
+        error = Error(Errornr.SYNTAX_ERROR, text)
+    return (reduce_list, error)
 
 def readFromFile(filename : str) -> Union[str, None]:
     if(os.access(filename, os.R_OK)):
@@ -106,11 +161,14 @@ def readFromFile(filename : str) -> Union[str, None]:
         return f.read()
     return None
 
+def function_wordToTuple(x, tail):
+    return [Token(returnTupleFromString(x))] + tail
+
 def lexer(filename : str) -> Union[Tuple[List[Token], Error], Tuple[None, Error]]:
     fileContainer = readFromFile(filename)
     if(fileContainer != None):
         wordlist = fileToWordlist(fileContainer)
-        tokenlist, errornr = wordlistToTokens(returnTupleFromString, wordlist)
-        return tokenlist, errornr
+        tokenlist, error = wordlistToTokens(function_wordToTuple, wordlist)
+        return tokenlist, error
     return None, Error(Errornr.FileNotFoundError, "Cannot open " + filename)
 

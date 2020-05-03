@@ -9,8 +9,9 @@ import time
 if __name__ == '__main__':
 
     lexer_list, errornr = lexer("test.txt")
+    print(lexer_list)
+    print( "------------------------")
     if(errornr.nr == Errornr.NO_ERROR):
-        print(lexer_list)
         tree, state, unprocessed = parse(lexer_list)
         if(len(unprocessed) > 0):
             print("Error, the characters ", unprocessed, " have not been processed")

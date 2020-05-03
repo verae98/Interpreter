@@ -49,27 +49,27 @@ def findNode(node : Node) -> Union[Node,None]:
             return node
         if(node.rhs == None):
             return node
+        if (isinstance(node.rhs, value_node)):
+            return node
         if (node.rhs != None):
             return findNode(node.rhs)
     return None
 
 
-def processMath(token: Token, current_node : Node) -> Node:
-    currentToken = token
-
+def processMath(currentToken: Token, current_node : Node) -> Node:
     if (currentToken.instance == "PLUS" or currentToken.instance == "MIN"):
         new_node = operator_node(currentToken.type, current_node, currentToken.instance)
-        current_node = new_node
+        return new_node
     elif (currentToken.instance == "MULTIPLY" or currentToken.instance == "DEVIDED_BY"):
+        # find the node that is not filled yet
         node_ = findNode(current_node)
         if(node_ != None):
-            new_node = operator_node(node_.value, None, node_.operator)
-            node_.value = currentToken.type
-            node_.operator = currentToken.instance
-            node_.lhs = new_node
+            lhs = node_.rhs
+            new_node = operator_node(currentToken.type, lhs, currentToken.instance)
+            node_.rhs = new_node
         else:
-            pass
-            # TODO fi else
+            new_node = operator_node(currentToken.type, current_node, currentToken.instance)
+            current_node = new_node
 
     else:
         new_node = value_node(currentToken.type, currentToken.instance)
@@ -89,29 +89,18 @@ def processMath(token: Token, current_node : Node) -> Node:
                 # TODO: raise error
     return current_node
 
-def processComparison(tokens: List[Token], index : int) -> (Node, State):
+def processComparison(tokens: List[Token]) -> Node:
+    # get first element that meets the condition
+    func = lambda currentToken: currentToken.instance == "EQUAL" or currentToken.instance == "NOTEQUAL" or currentToken.instance == "GE" \
+        or currentToken.instance == "SE" or currentToken.instance == "GREATER" or currentToken.instance == "SMALLER"
+    index = _getFirst(list(map(func, tokens)))
 
-    if (index <= -1):
-        return Node(), State.Idle
-
-    current_node, state = processComparison(tokens, index-1)
-    currentToken = tokens[index]
-
-    if (currentToken.instance == "EQUAL" or currentToken.instance == "NOTEQUAL" or currentToken.instance == "GE"
-        or currentToken.instance == "SE" or currentToken.instance == "GREATER" or currentToken.instance == "SMALLER"):
-
-        current_node = operator_node(currentToken.type, current_node, currentToken.instance)
-        new_node, status, unprocessed = processTokens(tokens[0:index])
-        current_node.lhs = new_node[0]
-
-        state = state.COMPARISON
-    else:
-        if(state == State.COMPARISON):
-            new_node, status, unprocessed = processTokens(tokens[index:])
-            current_node.rhs, = new_node
-            state = State.DONE
-    return current_node, state
-
+    lhs, state, unproccessed = processTokens(tokens[:index])
+    rhs, state, unproccessed = processTokens(tokens[index + 1:])
+    if (len(lhs) > 1 or len(rhs) > 1):
+        print("too many arguments for comparison")
+    current_node = operator_node(tokens[index].type, lhs[0], tokens[index].instance, rhs[0])
+    return current_node
 
 
 def processIf(tokens: List[Token], index : int) -> ([Node], State):
@@ -119,7 +108,6 @@ def processIf(tokens: List[Token], index : int) -> ([Node], State):
         return [Node()], State.Idle
     nodes, state = processIf(tokens, index-1)
     currentToken = tokens[index]
-    current_node = nodes[-1]
 
     if (currentToken.instance == "IF"):
         new_node = operator_node(currentToken.type, None, currentToken.instance)
@@ -133,16 +121,13 @@ def processIf(tokens: List[Token], index : int) -> ([Node], State):
 
             # set condition node to lhs of if node
             # get index of the start of the condition
-            index_l = getIndexToken(lambda x: x.instance == "LPAREN", tokens)
-            index_l = index_l + 1
-            compare_node, status = processComparison(tokens[index_l:index], (index - index_l)-1)
+            index_l = getIndexToken(lambda x: x.instance == "LPAREN", tokens) + 1
+            compare_node = processComparison(tokens[index_l:index])
             nodes[-2].lhs = compare_node
             # current node is empty
-            nodes[-1] = Node()
+            del nodes[-1]
             state = State.IF_BLOCK
-            return nodes, state
-        else:
-            return nodes, state
+        return nodes, state
 
     if (state == State.IF_BLOCK):
         if (currentToken.instance == "LBRACE"):
@@ -150,35 +135,24 @@ def processIf(tokens: List[Token], index : int) -> ([Node], State):
             in_braces, state, unprocessed = processTokens(tokens[index+1:-1])
             nodes[0].rhs = in_braces
             state = State.DONE
-            return nodes, state
-        if (currentToken.instance == "RPAREN"):
-            return nodes, state
+        return nodes, state
 
     return nodes, state
 
-def processAssign(tokens: List[Token], index : int) -> (Node, State):
-    if (index <= -1):
-        return Node(), State.Idle
+def processAssign(tokens: List[Token]) -> (Node):
 
-    current_node, state = processAssign(tokens, index-1)
-    currentToken = tokens[index]
+    func = lambda x: x.instance == "ASSIGN"
+    result = list(map(func, tokens))
+    index = _getFirst(result)
+    if(index != 1):
+        print("too many arguments for assignment")
+    lhs = value_node(tokens[0].type, "VAR_ASSIGN")
+    rhs, state, unproccessed = processTokens(tokens[index+1:])
+    if(len(rhs) > 1):
+        print("too many arguments for assignment")
+    current_node = operator_node(tokens[index].type, lhs, tokens[index].instance, rhs[0])
+    return current_node
 
-    if (state == State.DONE):
-        return current_node, state
-
-    elif(state == State.ASSIGN):
-        rhs, status, unprocessed = processTokens(tokens[index:])
-        # returns list[Node] so get only first element
-        current_node.rhs = rhs[0]
-        state = State.DONE
-
-    elif (currentToken.instance == "ASSIGN"):
-        current_node = operator_node(currentToken.type, current_node, currentToken.instance)
-        state = State.ASSIGN
-        lhs_node = value_node(tokens[index-1].type, "VAR_ASSIGN")
-        current_node.lhs = lhs_node
-
-    return current_node, state
 
 def processVar(token : Token) -> Node:
     return value_node(token.type, token.instance)
@@ -192,10 +166,9 @@ def _getFirst(list_to_check : List[bool]) -> int:
     return index
 
 def getIndexToken(f : Callable[[Token], bool], tokens : List[Token]) -> [int] :
-    print(tokens)
-    int_list = map(f, tokens)
-   # convert map to list
-    return _getFirst(list(int_list))
+    int_list = list(map(f, tokens))
+    # get first element that has the match, return index
+    return _getFirst(int_list)
 
 
 def processWhile(tokens: List[Token], index : int) -> ([Node], State):
@@ -215,7 +188,7 @@ def processWhile(tokens: List[Token], index : int) -> ([Node], State):
             # set condition node to lhs of if node
             index_l = getIndexToken(lambda x: x.instance == "LPAREN", tokens)
             index_l = index_l + 1
-            compare_node, status = processComparison(tokens[index_l:index], (index - index_l) - 1)
+            compare_node = processComparison(tokens[index_l:index])
             nodes[-2].lhs = compare_node
             # current node is empty
             nodes[-1] = Node()
@@ -269,7 +242,7 @@ def _processTokens(tokens: List[Token]) -> ([Node], State, List[Token]):
     elif (state == State.ASSIGN):
         if(currentToken.instance == "SEMICOLON"):
             unprocessedTokens.append(currentToken)
-            new_node, state_ = processAssign(unprocessedTokens, len(unprocessedTokens)-1)
+            new_node = processAssign(unprocessedTokens)
             unprocessedTokens = []
             nodes.append(new_node)
             state = State.Idle

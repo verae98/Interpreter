@@ -1,14 +1,15 @@
-from typing import Tuple, List
+from typing import Tuple, List, Callable
 from Parser import Node, operator_node, value_node
 
 class enum():
     def __init__(self):
         self.variables = {}
         self.enum_dict = {}
+        self.devide = self.smart_devide(lambda x, y : x/y)
         self.enum_dict["PLUS"] = lambda a, b : a + b
         self.enum_dict["MIN"] = lambda a, b: a - b
         self.enum_dict["MULTIPLY"] = lambda a, b: a * b
-        self.enum_dict["DEVIDED_BY"] = lambda a, b: a / b
+        self.enum_dict["DEVIDED_BY"] = lambda a, b: self.devide(a,b)
         self.enum_dict["ASSIGN"] = lambda d, key, value: d.update({key:value})
         self.enum_dict["EQUAL"] = lambda a, b : a == b
         self.enum_dict["NOTEQUAL"] = lambda a, b: a != b
@@ -23,6 +24,13 @@ class enum():
     def whilefunc(self, a : List[Node], b : List[Node]):
         while(self.AST_to_actions(a)):
             self.AST_to_actions(b)
+
+    def smart_devide(self, f : Callable):
+        def inner(a, b):
+            if(b == 0):
+                return
+            return f(a,b)
+        return inner
 
     def getVariable(self, a : str):
         return self.variables[a]

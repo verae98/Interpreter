@@ -1,3 +1,4 @@
+reken = 4 + 4 + 3 + 8 * 8 - 70 / 10 ; 
 vera = 8 ;
 test = 0 ;
 while ( vera > 2 ) {
