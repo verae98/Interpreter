@@ -2,12 +2,12 @@ import re
 import os
 from typing import List, Tuple, Callable, Union
 from Enums import Error, Errornr
-from functools import reduce
 
 class Token():
-    def __init__(self, instance : Tuple[str,str]): # ("PLUS", "+")
+    def __init__(self, instance : Tuple[str,str, int]): # ("PLUS", "+")
         self.instance = instance[0]
         self.type = instance[1]
+        self.linenr = instance[2]
 
     def __str__(self) -> str:
         return (self.instance + " -> " + self.type)
@@ -66,54 +66,54 @@ def new_returnTupleFromString(stringToParse : str) -> (Tuple[str, str]):
     else:
         return (("ERROR", stringToParse))
 
-def returnTupleFromString(stringToParse : str) -> (Tuple[str, str]):
+def returnTupleFromString(stringToParse : str, linenr : int) -> (Tuple[str, str]):
 
     if (stringToParse == "+"):
-        return (("PLUS", stringToParse))
+        return (("PLUS", stringToParse, linenr))
     if (stringToParse == "-"):
-        return (("MIN", stringToParse))
+        return (("MIN", stringToParse, linenr))
     if (stringToParse == "*"):
-        return (("MULTIPLY", stringToParse))
+        return (("MULTIPLY", stringToParse, linenr))
     if (stringToParse == "/"):
-        return (("DEVIDED_BY", stringToParse))
+        return (("DEVIDED_BY", stringToParse, linenr))
     if (stringToParse.isnumeric() or (stringToParse[0] == "-" and stringToParse[1:].isnumeric())):
-        return (("NUMBER", stringToParse))
+        return (("NUMBER", stringToParse, linenr))
     if(stringToParse == "if"):
-        return (("IF", stringToParse))
+        return (("IF", stringToParse, linenr))
     if (stringToParse == "else"):
-        return (("ELSE", stringToParse))
+        return (("ELSE", stringToParse, linenr))
     if (stringToParse == "="):
-        return (("ASSIGN", stringToParse))
+        return (("ASSIGN", stringToParse, linenr))
     if (stringToParse == "while"):
-        return (("WHILE", stringToParse))
+        return (("WHILE", stringToParse, linenr))
 
     if (stringToParse == "=="):
-        return (("EQUAL", stringToParse))
+        return (("EQUAL", stringToParse, linenr))
     if (stringToParse == "!="):
-        return (("NOTEQUAL", stringToParse))
+        return (("NOTEQUAL", stringToParse, linenr))
     if (stringToParse == ">="):
-        return (("GE", stringToParse))
+        return (("GE", stringToParse, linenr))
     if (stringToParse == "<="):
-        return (("SE", stringToParse))
+        return (("SE", stringToParse, linenr))
     if (stringToParse == ">"):
-        return (("GREATER", stringToParse))
+        return (("GREATER", stringToParse, linenr))
     if (stringToParse == "<"):
-        return (("SMALLER", stringToParse))
+        return (("SMALLER", stringToParse, linenr))
 
     if (stringToParse == ";"):
-        return (("SEMICOLON", stringToParse))
+        return (("SEMICOLON", stringToParse, linenr))
     if (stringToParse == "("):
-        return (("LPAREN", stringToParse))
+        return (("LPAREN", stringToParse, linenr))
     if (stringToParse == ")"):
-        return (("RPAREN", stringToParse))
+        return (("RPAREN", stringToParse, linenr))
     if (stringToParse == "{"):
-        return (("LBRACE", stringToParse))
+        return (("LBRACE", stringToParse, linenr))
     if (stringToParse == "}"):
-        return (("RBRACE", stringToParse))
+        return (("RBRACE", stringToParse, linenr))
     if (stringToParse == "print"):
-        return (("PRINT", stringToParse))
+        return (("PRINT", stringToParse, linenr))
     if (re.fullmatch("^[a-zA-Z_][a-zA-Z0-9_]*", stringToParse)):
-        return (("VAR", stringToParse))
+        return (("VAR", stringToParse, linenr))
 
     else:
         return (("ERROR", stringToParse))
@@ -140,35 +140,55 @@ def createWordlist(string_file : str) -> List[str]:
 
     return current_wordlist
 
+
 def foldl(f: Callable, base, list):
     if(len(list) == 0):
         return base
     head, *tail = list
     return (f(head, foldl(f, base, tail)))
 
-def wordlistToTokens(f : Callable, wordlist : List[str]) -> (List[Tuple[str, str]], Error):
+def wordlistToTokens(f : Callable, wordlist : List[str], linenr : int) -> (List[Tuple[str, str]], Error):
     error = Error(Errornr.NO_ERROR)
-    reduce_list = foldl(f, [], wordlist)
-    errorlist = list(filter(lambda x: x.instance == "ERROR", reduce_list))
+    line_list = [linenr] * len(wordlist)
+    string_and_line = list((zip(wordlist,line_list)))
+    tokenlist = foldl(f,[], (string_and_line))
+    errorlist = list(filter(lambda x: x.instance == "ERROR", tokenlist))
     if(len(errorlist) > 0):
         text = "Cannot define " + " \"" + errorlist[0].type + "\" " +  " "
         error = Error(Errornr.SYNTAX_ERROR, text)
-    return (reduce_list, error)
+    return (tokenlist, error)
+
+def read_rec(f):
+    read = (f.readline())
+    if (read == ""):
+        return [read]
+    return [read] + read_rec(f)
 
 def readFromFile(filename : str) -> Union[str, None]:
     if(os.access(filename, os.R_OK)):
         f = open(filename, "r")
-        return f.read()
+        lines = read_rec(f)
+        f.close()
+        return lines
     return None
 
 def function_wordToTuple(x, tail):
-    return [Token(returnTupleFromString(x))] + tail
+    return [Token(returnTupleFromString(x[0], x[1]))] + tail
+
+def lex_func(head, linenr : int):
+    wordlist = fileToWordlist(head)
+    tokenlist, error = wordlistToTokens(function_wordToTuple, wordlist, linenr)
+    return tokenlist
+
+def lex_rec(f : Callable, fileContainer) -> List[Token]:
+    if(len(fileContainer) <= 0):
+        return []
+    return lex_rec(f, fileContainer[:-1]) + f(fileContainer[-1], len(fileContainer))
 
 def lexer(filename : str) -> Union[Tuple[List[Token], Error], Tuple[None, Error]]:
     fileContainer = readFromFile(filename)
     if(fileContainer != None):
-        wordlist = fileToWordlist(fileContainer)
-        tokenlist, error = wordlistToTokens(function_wordToTuple, wordlist)
-        return tokenlist, error
+        tokenlist = lex_rec(lex_func, fileContainer)
+        return tokenlist, Error(Errornr.NO_ERROR)
     return None, Error(Errornr.FileNotFoundError, "Cannot open " + filename)
 

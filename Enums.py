@@ -4,6 +4,7 @@ class Errornr(Enum):
     NO_ERROR = "No Error"
     SYNTAX_ERROR = "Syntax Error"
     FileNotFoundError = "File Not Found Error"
+    MATH_ERROR = "Math Error"
 
 class Error():
     def __init__(self, errornr : Errornr, errormsg = ""):
@@ -28,3 +29,4 @@ class State(Enum):
     WHILE_CONDITION = 9
     WHILE_BLOCK = 10
     COMPARISON = 11
+    ERROR = 12
