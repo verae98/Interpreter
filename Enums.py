@@ -20,13 +20,12 @@ class Error():
 class State(Enum):
     Idle = 0
     Math = 1
-    IF = 2
     IF_CONDITION = 3
     IF_BLOCK = 4
     ASSIGN = 6
     DONE = 7
-    WHILE = 8
     WHILE_CONDITION = 9
     WHILE_BLOCK = 10
     COMPARISON = 11
     ERROR = 12
+    IF_WHILE = 13

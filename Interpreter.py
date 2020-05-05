@@ -12,10 +12,9 @@ if __name__ == '__main__':
     print( "------------------------")
     if(errornr.nr == Errornr.NO_ERROR):
         tree, pv = parse(lexer_list)
-        print(pv.error_list)
         if(len(pv.error_list) > 0):
             print(pv.error_list)
-        if(len(pv.unprocessedTokens) > 0):
+        elif(len(pv.unprocessedTokens) > 0):
             print("Error, the characters ", pv.unprocessedTokens, " have not been processed")
         else:
             print("TREE:")

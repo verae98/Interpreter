@@ -51,7 +51,7 @@ class ProgramValues():
         self.error_list = error_list
 
     def __str__(self):
-        return "ProgramValues ( State: "  + str(self.state) + ", Unprocessed " + str(self.unprocessedTokens) + " )"
+        return "ProgramValues ( State: "  + str(self.state) + ", Unprocessed " + str(self.unprocessedTokens) + ", Errorlist " + str(self.error_list) + " )"
 
     def __repr__(self):
         return self.__str__()
@@ -102,11 +102,9 @@ def processMath(currentToken1: Token, current_node1 : Node) -> (Node, [Error]):
                 elif (node_.rhs == None):
                     node_.rhs = new_node
                 else:
-                    print("Too many numbers versus operators Linenr: ", currentToken.linenr, currentToken)
                     error.append(Error(Errornr.MATH_ERROR, "On line: " + str(currentToken.linenr) + ", too many numbers versus operators"))
             else:
-                print("Math process: cannot get node")
-                error.append(Error(Errornr.MATH_ERROR, "An unknown math error has occurred"))
+                error.append(Error(Errornr.MATH_ERROR, "On line: " + str(currentToken.linenr) + ", cannot calculate " + currentToken.type))
                 pass
     return current_node, error
 
@@ -119,34 +117,45 @@ def processComparison(tokens1: List[Token]) -> (Node, [Error]):
     index = _getFirst(list(map(func, tokens)))
 
     lhs, pv = processTokens(tokens[:index])
-    if (pv.state == State.ERROR):
+    if(len(pv.error_list) > 0):
         error.append(pv.error_list)
+    if (pv.state == State.ERROR or len(lhs) > 1 ):
+        error.append(Error(Errornr.SYNTAX_ERROR, "On line " + str(tokens[0].linenr) + " ^" + str(tokens[0].type) + " invalid syntax: too many arguments for comparison"))
     rhs, pv = processTokens(tokens[index + 1:])
-    if (pv.state == State.ERROR):
-        error.append(pv.error_list)
-    if (len(lhs) > 1 or len(rhs) > 1):
-        #error.append(Error(Errornr.SYNTAX_ERROR, "On line: " + tokens[0].linenr + "invalid syntax: too many arguments for comparison"))
-        print("too many arguments for comparison")
+    if ((pv.state == State.ERROR or len(rhs) > 1) and len(error) == 0):
+        error.append(Error(Errornr.SYNTAX_ERROR, "On line " + str(tokens[0].linenr) + " ^" + str(tokens[index + 1].type) + " invalid syntax: too many arguments for comparison"))
     current_node = operator_node(tokens[index].type, lhs[0], tokens[index].instance, rhs[0])
     return current_node, error
 
 
-def processIf_While(tokens1: List[Token]) -> (Node, ProgramValues):
+def processIf_While(tokens1: List[Token]) -> Union[Tuple[Node, ProgramValues], Tuple[None, List[Error]] ]:
     error = []
     tokens = copy.copy(tokens1)
     index_parL = getIndexToken(lambda x: x.instance == "LPAREN", tokens)
     index_parR = getIndexToken(lambda x: x.instance == "RPAREN", tokens)
     index_bracL = getIndexToken(lambda x: x.instance == "LBRACE", tokens)
+    print(index_parR)
+    print(index_bracL)
     if(index_parL == -1 or index_parR == -1):
-        error.append(Error(Errornr.SYNTAX_ERROR, "Syntax Error on line "))
+        error.append(Error(Errornr.SYNTAX_ERROR, "Syntax Error on line " + str(tokens[0].linenr)))
+        return None, error
+
+    if((index_bracL - index_parR) != 1):
+        print("1111111111111111111111")
+        error.append(Error(Errornr.SYNTAX_ERROR, "Syntax Error on line " + str(tokens[index_parR].linenr)))
+        return None, error
     elif(index_bracL == -1):
-        error.append(Error(Errornr.SYNTAX_ERROR, "Syntax Error on line "))
+        error.append(Error(Errornr.SYNTAX_ERROR, "Syntax Error on line " + str(tokens[index_parR].linenr)))
+        return None, error
 
     new_node = operator_node(tokens[0].type, None, tokens[0].instance)
     compare_node, error = processComparison(tokens[index_parL+1:index_parR])
     node_list_rhs, pv1 = processTokens(tokens[index_bracL+1:-1])
     pv = copy.copy(pv1)
     pv.unprocessedTokens = []
+    if(len(error) > 0):
+        pv.error_list.append(error)
+        pv.state = State.ERROR
     new_node.lhs = compare_node
     new_node.rhs = node_list_rhs
     return new_node, pv
@@ -156,17 +165,15 @@ def processAssign(tokens1: List[Token]) -> (Node, ProgramValues):
     tokens = copy.copy(tokens1)
     index = getIndexToken(lambda x: x.instance == "ASSIGN", tokens)
     if(index != 1):
-        #error.append(Error(Errornr.SYNTAX_ERROR, "too many arguments for assignment"))
-        print("too many arguments for assignment")
+        error.append(Error(Errornr.SYNTAX_ERROR, "too many arguments for assignment"))
     lhs = value_node(tokens[0].type, "VAR_ASSIGN")
     rhs, pv1 = processTokens(tokens[index+1:])
     pv = copy.copy(pv1)
     pv.unprocessedTokens = []
     if (pv.state == State.ERROR):
-        error.append(Error(Errornr.SYNTAX_ERROR, "Cannot process rhs"))
+        pv.error_list.append(Error(Errornr.SYNTAX_ERROR, "Cannot process rhs"))
     if(len(rhs) > 1):
-        #error.append(Error(Errornr.SYNTAX_ERROR, "too many arguments for assignment"))
-        print("too many arguments for assignment")
+        pv.error_list.append(Error(Errornr.SYNTAX_ERROR, "too many arguments for assignment"))
     current_node = operator_node(tokens[index].type, lhs, tokens[index].instance, rhs[0])
     return current_node, pv
 
@@ -250,32 +257,15 @@ def _processTokens(tokens1: List[Token]) -> ([Node], ProgramValues):
             pv.unprocessedTokens.append(currentToken)
         return nodes, pv
 
-    elif (pv.state == State.WHILE):
-        pv.unprocessedTokens.append(currentToken)
-        if (currentToken.instance == "RBRACE"):
-            amountBraces = amountOpenBraces(pv.unprocessedTokens)
-            if(amountBraces == 0):
-                new_node, pv = processIf_While(pv.unprocessedTokens)
-                if (len(pv.error_list) > 0):
-                    pv.state = State.ERROR
-                    return nodes, pv
-                nodes.append(new_node)
-                pv.unprocessedTokens = []
-                pv.state = State.Idle
-                nodes.append(Node())
-            elif(amountBraces < 0):
-                print("error braces not correct")
-
-        return nodes, pv
-
-    elif(pv.state == State.IF):
+    elif(pv.state == State.IF_WHILE):
         pv.unprocessedTokens.append(currentToken)
         if(currentToken.instance == "RBRACE"):
             amountBraces = amountOpenBraces(pv.unprocessedTokens)
             if (amountBraces == 0):
-                new_node, pv = processIf_While(pv.unprocessedTokens)
-                if (len(pv.error_list) > 0):
+                new_node, pv1 = processIf_While(pv.unprocessedTokens)
+                if(new_node == None):
                     pv.state = State.ERROR
+                    pv.error_list.append(pv1)
                     return nodes, pv
                 nodes.append(new_node)
                 pv.unprocessedTokens = []
@@ -313,10 +303,10 @@ def _processTokens(tokens1: List[Token]) -> ([Node], ProgramValues):
 
 
     elif(currentToken.instance == "IF"):
-        pv.state = State.IF
+        pv.state = State.IF_WHILE
 
     elif (currentToken.instance == "WHILE"):
-        pv.state = State.WHILE
+        pv.state = State.IF_WHILE
 
     pv.unprocessedTokens.append(currentToken)
 
