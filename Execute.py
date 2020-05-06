@@ -20,6 +20,7 @@ class enum():
         self.enum_dict["IF"] = lambda a, b: self.AST_to_actions(b) if(a) else None
         self.enum_dict["WHILE"] = lambda a, b: self.whilefunc(a,b)
         self.enum_dict["VAR"] = lambda a, b: self.variables[a]
+        self.enum_dict["PRINT"] = lambda a, b : print(b)
 
     def whilefunc(self, a : List[Node], b : List[Node]):
         while(self.AST_to_actions(a)):

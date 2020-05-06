@@ -45,7 +45,7 @@ class value_node(Node):
         return self.__str__()
 
 class ProgramValues():
-    def __init__(self, state = State.Idle, unprocessed = list(), error_list = list()):
+    def __init__(self, state : State = State.Idle, unprocessed : List[Token] = list(), error_list : List[Error] = list()):
         self.state = state
         self.unprocessedTokens = unprocessed
         self.error_list = error_list
@@ -134,14 +134,12 @@ def processIf_While(tokens1: List[Token]) -> Union[Tuple[Node, ProgramValues], T
     index_parL = getIndexToken(lambda x: x.instance == "LPAREN", tokens)
     index_parR = getIndexToken(lambda x: x.instance == "RPAREN", tokens)
     index_bracL = getIndexToken(lambda x: x.instance == "LBRACE", tokens)
-    print(index_parR)
-    print(index_bracL)
+
     if(index_parL == -1 or index_parR == -1):
         error.append(Error(Errornr.SYNTAX_ERROR, "Syntax Error on line " + str(tokens[0].linenr)))
         return None, error
 
     if((index_bracL - index_parR) != 1):
-        print("1111111111111111111111")
         error.append(Error(Errornr.SYNTAX_ERROR, "Syntax Error on line " + str(tokens[index_parR].linenr)))
         return None, error
     elif(index_bracL == -1):
@@ -223,6 +221,19 @@ def _processTokens(tokens1: List[Token]) -> ([Node], ProgramValues):
     currentToken = tokens[-1]
     if(pv.state == State.ERROR):
         return nodes, pv
+    if(pv.state == State.PRINT):
+        if(currentToken.instance == "SEMICOLON"):
+            new_node = operator_node(pv.unprocessedTokens[0].type, None, pv.unprocessedTokens[0].instance)
+            rhs, pv = copy.copy(processTokens(pv.unprocessedTokens[1:]))
+            pv.state = State.Idle
+            if(len(rhs) > 0):
+                new_node.lhs = rhs[0]
+                new_node.rhs = rhs[0]
+            nodes.append(new_node)
+            return nodes, pv
+        pv.unprocessedTokens.append(currentToken)
+        return nodes, pv
+
     if (pv.state == State.Math):
         # program rules, assignment before math
         if (currentToken.instance == "ASSIGN"):
@@ -307,6 +318,9 @@ def _processTokens(tokens1: List[Token]) -> ([Node], ProgramValues):
 
     elif (currentToken.instance == "WHILE"):
         pv.state = State.IF_WHILE
+
+    elif (currentToken.instance == "PRINT"):
+        pv.state = State.PRINT
 
     pv.unprocessedTokens.append(currentToken)
 

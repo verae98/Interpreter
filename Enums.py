@@ -29,3 +29,4 @@ class State(Enum):
     COMPARISON = 11
     ERROR = 12
     IF_WHILE = 13
+    PRINT = 14
