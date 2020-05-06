@@ -5,6 +5,7 @@ class Errornr(Enum):
     SYNTAX_ERROR = "Syntax Error"
     FileNotFoundError = "File Not Found Error"
     MATH_ERROR = "Math Error"
+    NameError = "Name Error"
 
 class Error():
     def __init__(self, errornr : Errornr, errormsg = ""):

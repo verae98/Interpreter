@@ -1,5 +1,6 @@
-from typing import Tuple, List, Callable
+from typing import Tuple, List, Callable, Union
 from Parser import Node, operator_node, value_node
+from Enums import Error, Errornr
 
 class ProgramActions():
     def __init__(self):
