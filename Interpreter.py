@@ -1,6 +1,6 @@
 from Lexer import lexer, Token
 from Parser import parse
-from Execute import enum
+from Execute import ProgramActions, AST_to_actions
 from Enums import Errornr
 from Parser import parse
 
@@ -22,8 +22,8 @@ if __name__ == '__main__':
 
             time.sleep(1)
 
-            exec = enum()
-            exec.AST_to_actions(tree)
+            exec = ProgramActions()
+            AST_to_actions(exec, tree)
             print(exec.variables)
 
     else:

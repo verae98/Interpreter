@@ -59,7 +59,7 @@ def new_returnTupleFromString(stringToParse : str, linenr : int) -> (Tuple[str, 
         return (("LBRACE", stringToParse, linenr))
     if (stringToParse == "fa_fine"):
         return (("RBRACE", stringToParse, linenr))
-    if (stringToParse == "print"):
+    if (stringToParse == "taispeain"):
         return (("PRINT", stringToParse, linenr))
     if (re.fullmatch("^[@][a-zA-Z0-9_]*", stringToParse)):
         return (("VAR", stringToParse, linenr))
@@ -197,7 +197,7 @@ def lexer(filename : str) -> Union[Tuple[List[Token], Error], Tuple[None, Error]
         errorlist = list(filter(lambda x: x.instance == "ERROR", tokenlist))
         error = Error(Errornr.NO_ERROR)
         if (len(errorlist) > 0):
-            error = (Error(Errornr.SYNTAX_ERROR, "Cannot define " + " \"" + errorlist[0].type + "\" " + " "))
+            error = (Error(Errornr.SYNTAX_ERROR, "On line " + str(errorlist[0].linenr) + ", cannot define " + " \"" + errorlist[0].type + "\" " + " "))
         return tokenlist, error
     return None, Error(Errornr.FileNotFoundError, "Cannot open " + filename)
 
