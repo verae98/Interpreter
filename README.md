@@ -35,7 +35,7 @@ Ves++ has a small error handling included. When an error occurs, it show the err
 - Comment lines are integrated. Lines with '$' before it are comment lines
 
 ## Used high order functions 
-The interpreter is using the following high order functions:
+The interpreter uses the following high order functions:
 - Foldl
 - Zip
 - Filter
