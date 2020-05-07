@@ -23,8 +23,11 @@ if __name__ == '__main__':
             time.sleep(1)
 
             exec = ProgramActions()
-            AST_to_actions(exec, tree)
-            print(exec.variables)
+            result, error = AST_to_actions(exec, tree)
+            if(error.nr != Errornr.NO_ERROR):
+                print(error)
+            else:
+                print(exec.variables)
 
     else:
         print("Whoops: ")

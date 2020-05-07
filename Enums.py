@@ -8,7 +8,7 @@ class Errornr(Enum):
     NameError = "Name Error"
 
 class Error():
-    def __init__(self, errornr : Errornr, errormsg = ""):
+    def __init__(self, errornr : Errornr = Errornr.NO_ERROR, errormsg = ""):
         self.nr = errornr
         self.msg = errormsg
 

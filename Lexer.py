@@ -115,6 +115,8 @@ def returnTupleFromString(stringToParse : str, linenr : int) -> (Tuple[str, str,
         return (("RBRACE", stringToParse, linenr))
     if (stringToParse == "print"):
         return (("PRINT", stringToParse, linenr))
+    if (stringToParse == "#"):
+        return (("PRINT_END", stringToParse, linenr))
     if (re.fullmatch("^[a-zA-Z_][a-zA-Z0-9_]*", stringToParse)):
         return (("VAR", stringToParse, linenr))
 
