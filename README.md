@@ -3,6 +3,13 @@
 This language has included the most common languages from west-europe (and for some random reason I have added the turkish language).
 This way many people are able to understand a part of the code, yet (probably) not everything. In my opinion it is a fun way to get involved with other languages!
 
+### Chosen extra features
+- [Error-messaging](https://github.com/vera98x/Interpreter/blob/master/README.md#errorhandling)
+- [Advanced language features](https://github.com/vera98x/Interpreter/blob/master/README.md#Advanced-language-features)
+- Creating my own language
+- [Instruction-and-show-off video](https://github.com/vera98x/Interpreter/blob/master/README.md#link-to-instruction-video)
+
+
 #### Translation table
 |Type| Word in this language | Language where it comes from
 |---|---|---|
@@ -68,14 +75,14 @@ taispeain
 #
 ```
 
-## Errorhandling
+## Error-messaging
 Ves++ has a small error handling included. When an error occurs, it show the errormessage and the line the error has occurred for debug purposes. An error will be given for the following issues:
 - Unknown symbol
 - Syntax error with for example two numbers after each other without operator between them
 - Variables that have not been defined
 - Assignment to a non-variable, such as number 8
 
-## Features
+## Advanced language features
 - Calutations can be made with the plus-, min-, multiply- and divide operator. These calculations are according the math rules
 - Print statement: you can print multiple variables or expressions
 - Comment lines are integrated. Lines starting with '$' are comment lines
