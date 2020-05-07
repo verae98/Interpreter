@@ -47,9 +47,9 @@ The interpreter has one inheritance, this is for the Node class. This class has 
 
 
 ## Example
-Below is shown an example of the ves++ code. This has been translated to pseudo code (based on c++) to give an impression of how the code works 
+Below is shown an example of the ves++ code. 
 
-### Code in ves++
+#### Code in ves++
 ```
 vera er 8 fin
 test er 0 fin
