@@ -21,14 +21,26 @@ Translation table
 | Right parenthesis | haakje_eind | Dutch | 
 | Left bracet | fa_inizio | Italian | 
 | Right bracet | fa_fine | Italian | 
+| Print statement | taispeain | Irish | 
 
 ## Errorhandling
+Ves++ has a small error handling included. When an error occurs, it show the errormessage and the line the error has occurred for debug purposes. An error will be given for the following issues:
+- Unknown symbol
+- Syntax error with for example two numbers after each other without operator between them
 
 ## Features
+- Calutations can be made with the plus, min multyply and divide operator. These calculations are according the math rules
+- Print statement: you can print variables or expressions
+- Comment lines are integrated. Lines with '$' before it are comment lines
 
 ## Used high order functions 
+The interpreter is using the following high order functions:
+- Foldl
+- Zip
+- Filter
 
 ## Inheritance 
+The interpreter has one inheritance, this is for the Node class. This class has two childs: operator_node and value_node
 
 ## Link to instruction video
 
@@ -49,21 +61,6 @@ fa_fine
 ef haakje_begin vera > 0 haakje_eind fa_inizio
    geslaagd er 1 fin
 fa_fine
-```
-
-### Translation of the code 
-```
-vera = 8 ;
-test = 0 ;
-while ( vera > 2 ) {
-	if ( vera / 2 == 3 ) {
-		test = test + 1 ;
-	} 
-	vera = vera - 1 ;
-}
-if ( vera > 0 ) {
-   geslaagd = 1 ;
-}
 ```
 
 
