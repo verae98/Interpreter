@@ -95,7 +95,7 @@ The interpreter has one inheritance, this is for the Node class. This class has 
 ## Examples
 Below are examples shown of the ves++ code. 
 
-#### Printing statements
+### Printing statements
 ```
 taispeain 
 	2 mas 2 fin
@@ -108,7 +108,7 @@ Result is:
 25.0
 ```
 
-#### Code in ves++
+### Code in ves++
 ```
 vera er 8 fin
 test er 0 fin
