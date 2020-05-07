@@ -3,7 +3,7 @@
 This language has included the most common languages from west-europe (and for some random reason I have added the turkish language).
 This way many understands a part of the code, yet (probably) not everything. In my opinion it is a fun way to get involved with other languages!
 
-Translation table
+#### Translation table
 |Type| Word in this language | Language where it comes from
 |---|---|---|
 |Plus operator | mas | Spanish|
@@ -23,17 +23,62 @@ Translation table
 | Right bracet | fa_fine | Italian | 
 | Print statement | taispeain | Irish | 
 
+#### Symbol table
+|Symbol | Usage
+|---|---|
+|$ | Line starting with '$' are comment lines |
+|# | This character ends the print-statement |
+|@| Every variable starts with an @ | 
+| > | Greater than  | 
+| >= | Greater than or equal to  | 
+| < | Smaller than | 
+| <= | Smaller than or equal to | 
+
+## Use of operators
+### Math
+```
+<value> <math-keyword> <value>
+```
+
+### Assigning variable
+```
+@<variable name> er <value/statement> fin
+```
+	
+### If-statement
+```
+ef haakje_begin <condition> haakje_eind fa_inizio
+	<things you want to do>
+fa_fine
+```
+		
+### While-loop
+```
+aika haakje_begin <condition> haakje_eind fa_inizio
+	<things you want to do>
+fa_fine
+```
+	
+### Printing
+```
+taispeain 
+	<thing to print> fin
+	<thing to print> fin
+	... 
+#
+```
+
 ## Errorhandling
 Ves++ has a small error handling included. When an error occurs, it show the errormessage and the line the error has occurred for debug purposes. An error will be given for the following issues:
 - Unknown symbol
 - Syntax error with for example two numbers after each other without operator between them
 - Variables that have not been defined
-- Assignment to a non_variable, such as nummber 8
+- Assignment to a non-variable, such as number 8
 
 ## Features
-- Calutations can be made with the plus, min multyply and divide operator. These calculations are according the math rules
-- Print statement: you can print variables or expressions
-- Comment lines are integrated. Lines with '$' before it are comment lines
+- Calutations can be made with the plus-, min-, multiply- and divide operator. These calculations are according the math rules
+- Print statement: you can print multiple variables or expressions
+- Comment lines are integrated. Lines starting with '$' are comment lines
 
 ## Used high order functions 
 The interpreter uses the following high order functions:
@@ -47,8 +92,21 @@ The interpreter has one inheritance, this is for the Node class. This class has 
 ## Link to instruction video
 
 
-## Example
-Below is shown an example of the ves++ code. 
+## Examples
+Below are examples shown of the ves++ code. 
+
+#### Printing statements
+```
+taispeain 
+	2 mas 2 fin
+	5 vezes 5 fin
+#	
+```
+Result is:
+```
+4.0
+25.0
+```
 
 #### Code in ves++
 ```
