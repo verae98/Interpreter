@@ -27,7 +27,7 @@ Translation table
 Ves++ has a small error handling included. When an error occurs, it show the errormessage and the line the error has occurred for debug purposes. An error will be given for the following issues:
 - Unknown symbol
 - Syntax error with for example two numbers after each other without operator between them
-- Variables that have not been assigned yet
+- Variables that have not been defined
 
 ## Features
 - Calutations can be made with the plus, min multyply and divide operator. These calculations are according the math rules
