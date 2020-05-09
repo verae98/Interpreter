@@ -1,6 +1,6 @@
-# Ves++
+# VES++
 ### The language for everybody, yet nobody
-This language has included the most common languages from west-europe (and for some random reason I have added the turkish language).
+I love to learn new languages. My inspiration for this programlanguage is therefore based on my hobby. VES++ has included the most common languages from west-europe (and for some random reason I have added the turkish language).
 This way many people are able to understand a part of the code, yet (probably) not everything. In my opinion it is a fun way to get involved with other languages!
 
 ### Chosen extra features
@@ -102,7 +102,7 @@ The interpreter has one inheritance, this is for the Node class. This class has 
 
 
 ## Examples
-Below are examples shown of the ves++ code. 
+Below are examples shown of the VES++ code. 
 
 ### Printing statements
 ```
@@ -163,7 +163,7 @@ ef haakje_begin 2 < 3 haakje_eind fa_inizio
 fa_fine
 ```
 Result:
-1.0
+```1.0```
 
 ### If-statement in While-loop
 
