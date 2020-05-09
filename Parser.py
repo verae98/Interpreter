@@ -314,13 +314,6 @@ def processTokens(tokens1: List[Token]) -> (List[Node], ProgramValues):
         if(pv.state == State.Idle):
             pv.state = State.Math
             nodes.append(Node())
-            #TODO: check meaning for this
-            if (len(pv.unprocessedTokens) < 0):
-                nodes[-1], error = processMath(pv.unprocessedTokens[0], nodes[-1])
-                if (len(error) > 0):
-                    pv.error_list += (error)
-                    pv.state = State.ERROR
-                    return nodes, pv
 
             nodes[-1], error = processMath(currentToken, nodes[-1])
             if (len(error) > 0):
