@@ -111,25 +111,108 @@ taispeain
 	5 vezes 5 fin
 #	
 ```
-Result is:
+Result:
 ```
 4.0
 25.0
 ```
 
-### Code in ves++
+### Math rules
 ```
-vera er 8 fin
-test er 0 fin
-aika haakje_begin vera > 2 haakje_eind fa_inizio
-	ef haakje_begin vera dela 2 lig 3 haakje_eind fa_inizio
-		test er test mas 1 fin
-	fa_fine
-	vera er vera eksi 1 fin
-fa_fine
-ef haakje_begin vera > 0 haakje_eind fa_inizio
-   geslaagd er 1 fin
-fa_fine
+taispeain 
+	2 mas 2 vezes 5 eksi 4 fin
+#
+```
+Result: 
+```
+8
 ```
 
+### Assigning variables
+```
+$ @test is a variabele
+@ATP er 30 fin
+@test er @ATP fin
+@ATP er 20 fin
+taispeain
+	@ATP fin
+	@test fin
+#
+```
+Result:
+```
+20.0
+30.0
+```
+
+### If-statement in If-statement
+```
+$if-statement in if statement
+@vera er 21 fin
+ef haakje_begin 2 < 3 haakje_eind fa_inizio
+	ef haakje_begin @vera > 18 haakje_eind fa_inizio
+		taispeain
+			1 fin
+		#
+	fa_fine
+	ef haakje_begin @vera <= 18 haakje_eind fa_inizio
+		taispeain
+			0 fin
+		#
+	fa_fine
+fa_fine
+```
+Result:
+1.0
+
+### If-statement in While-loop
+
+```
+$while and if
+@ATP er 10 fin
+@counter er 0 fin
+aika haakje_begin @ATP > 0 haakje_eind fa_inizio
+	@ATP er @ATP eksi 1 fin
+	ef haakje_begin @ATP >= 5 haakje_eind fa_inizio
+		@counter er @counter mas 1 fin
+	fa_fine
+fa_fine
+
+taispeain
+	@ATP fin
+	@counter fin
+#
+```
+Result:
+```
+0.0
+5.0
+```
+
+### Combining the statements in ves++
+```
+@ATP er 8 fin
+@test er 0 fin
+aika haakje_begin @ATP > 2 haakje_eind fa_inizio
+	ef haakje_begin @ATP dela 2 lig 3 haakje_eind fa_inizio
+		@test er @test mas 1 fin
+	fa_fine
+	@ATP er @ATP eksi 1 fin
+fa_fine
+ef haakje_begin @ATP > 0 haakje_eind fa_inizio
+   @geslaagd er 1 fin
+fa_fine
+
+taispeain
+	@ATP fin
+	@test fin
+	@geslaagd fin
+#
+```
+Result:
+```
+2.0
+1.0
+1.0
+```
 
