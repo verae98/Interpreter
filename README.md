@@ -76,11 +76,12 @@ taispeain
 ```
 
 ## Error-messaging
-Ves++ has a small error handling included. When an error occurs, it show the errormessage and the line the error has occurred for debug purposes. An error will be given for the following issues:
-- Unknown symbol
-- Syntax error with for example two numbers after each other without operator between them
-- Variables that have not been defined
-- Assignment to a non-variable, such as number 8
+Ves++ is included with errormessaging. When an error occurs, it shows the errormessage and the line the error has occurred on for debug purposes. An error will be given for the following issues:
+- Unknown symbol, such as '=' '&' 'abcd'
+- Syntax errors
+- Undefined variables
+- Assignment to a non-variable, such as: 8 er 5 mas 5 fin
+- Division by zero
 
 ## Advanced language features
 - Calutations can be made with the plus-, min-, multiply- and divide operator. These calculations are according the math rules
@@ -92,6 +93,7 @@ The interpreter uses the following high order functions:
 - Foldl
 - Zip
 - Filter
+- Map
 
 ## Inheritance 
 The interpreter has one inheritance, this is for the Node class. This class has two childs: operator_node and value_node
