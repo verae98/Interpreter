@@ -23,6 +23,12 @@ class ProgramActions():
         self.enum_dict[TokenValues.VAR.value] = lambda enum, a, b: enum.variables[a]
         self.enum_dict[TokenValues.PRINT.value] = lambda enum, a, b : print_func(enum, b)
 
+    def __str__(self):
+        return (str(self.variables))
+
+    def __repr__(self):
+        return self.__str__()
+
 #print_func :: ProgramActions -> List[Node] -> None
 def print_func(enum : ProgramActions, b : List[Node]) -> None:
     '''Print the values of the nodes b

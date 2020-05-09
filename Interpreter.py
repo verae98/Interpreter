@@ -1,5 +1,4 @@
 from Lexer import lexer, Token
-from Parser import parse
 from Execute import ProgramActions, AST_to_actions
 from Enums import Errornr
 from Parser import parse
