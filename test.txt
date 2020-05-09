@@ -1,13 +1,19 @@
-print 5 ;
-reken = 2 + 2 ;   
-vera = 8 ; 
+$test
+vera = 8 + 8 ; 
 test = 0 ;
+print 
+	2 + 2 ;
+	5 + 5 ;
+	vera ;
+	test ;
+# 
 $ Loop through vera
 while ( vera > 2 ) {
-	if ( vera / 2 == 3 ) {
-		test = test + 1 ;
+	if ( vera / 2 >= 3 ) {
+		test = test + 1 
 	} 
 	vera = vera - 1 ;
+	print vera ;
 }
 if ( vera > 0 ) {
    geslaagd = 1 ;

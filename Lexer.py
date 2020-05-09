@@ -2,126 +2,74 @@ import re
 import os
 import io
 from typing import List, Tuple, Callable, Union, TypeVar
-from Enums import Error, Errornr
+from Enums import Error, Errornr, TokenValues
 
 class Token():
-    def __init__(self, instance : Tuple[str,str, int]): # ("PLUS", "+")
+    def __init__(self, instance : Tuple[TokenValues,str, int]): # ("PLUS", "+", 1)
         self.instance = instance[0]
         self.type = instance[1]
         self.linenr = instance[2]
 
     def __str__(self) -> str:
-        return (self.instance + " -> " + self.type)
+        return (str(self.instance.value) + " -> " + self.type)
 
     def __repr__(self) -> str:
         return self.__str__()
 
 #returnTupleFromString :: srt -> int -> Tuple[str, str, int]
-def new_returnTupleFromString(stringToParse : str, linenr : int) -> (Tuple[str, str, int]):
+def returnTupleFromString(stringToParse : str, linenr : int) -> (Tuple[str, str, int]):
     """Checks string and returns corresponding tuple"""
     if (stringToParse == "mas"):
-        return (("PLUS", stringToParse, linenr))
+        return ((TokenValues.PLUS, stringToParse, linenr))
     if (stringToParse == "eksi"):
-        return (("MIN", stringToParse, linenr))
+        return ((TokenValues.MIN, stringToParse, linenr))
     if (stringToParse == "vezes"):
-        return (("MULTIPLY", stringToParse, linenr))
+        return ((TokenValues.MULTIPLY, stringToParse, linenr))
     if (stringToParse == "dela"):
-        return (("DEVIDED_BY", stringToParse, linenr))
+        return ((TokenValues.DIVIDED_BY, stringToParse, linenr))
     if (stringToParse.isnumeric() or (stringToParse[0] == "-" and stringToParse[1:].isnumeric())):
-        return (("NUMBER", stringToParse, linenr))
+        return ((TokenValues.NUMBER, stringToParse, linenr))
     if(stringToParse == "ef"):
-        return (("IF", stringToParse, linenr))
+        return ((TokenValues.IF, stringToParse, linenr))
     if (stringToParse == "annars"):
-        return (("ELSE", stringToParse, linenr))
+        return ((TokenValues.ELSE, stringToParse, linenr))
     if (stringToParse == "er"):
-        return (("ASSIGN", stringToParse, linenr))
+        return ((TokenValues.ASSIGN, stringToParse, linenr))
     if (stringToParse == "aika"):
-        return (("WHILE", stringToParse, linenr))
+        return ((TokenValues.WHILE, stringToParse, linenr))
 
     if (stringToParse == "lig"):
-        return (("EQUAL", stringToParse, linenr))
+        return ((TokenValues.EQUAL, stringToParse, linenr))
     if (stringToParse == "unterschiedlich"):
-        return (("NOTEQUAL", stringToParse, linenr))
+        return ((TokenValues.NOTEQUAL, stringToParse, linenr))
     if (stringToParse == ">="):
-        return (("GE", stringToParse, linenr))
+        return ((TokenValues.GE, stringToParse, linenr))
     if (stringToParse == "<="):
-        return (("SE", stringToParse, linenr))
+        return ((TokenValues.SE, stringToParse, linenr))
     if (stringToParse == ">"):
-        return (("GREATER", stringToParse, linenr))
+        return ((TokenValues.GREATER, stringToParse, linenr))
     if (stringToParse == "<"):
-        return (("SMALLER", stringToParse, linenr))
+        return ((TokenValues.SMALLER, stringToParse, linenr))
 
     if (stringToParse == "fin"):
-        return (("SEMICOLON", stringToParse, linenr))
+        return ((TokenValues.SEMICOLON, stringToParse, linenr))
     if (stringToParse == "haakje_begin"):
-        return (("LPAREN", stringToParse, linenr))
+        return ((TokenValues.LPAREN, stringToParse, linenr))
     if (stringToParse == "haakje_eind"):
-        return (("RPAREN", stringToParse, linenr))
+        return ((TokenValues.RPAREN, stringToParse, linenr))
     if (stringToParse == "fa_inizio"):
-        return (("LBRACE", stringToParse, linenr))
+        return ((TokenValues.LBRACE, stringToParse, linenr))
     if (stringToParse == "fa_fine"):
-        return (("RBRACE", stringToParse, linenr))
+        return ((TokenValues.RBRACE, stringToParse, linenr))
     if (stringToParse == "taispeain"):
-        return (("PRINT", stringToParse, linenr))
-    if (re.fullmatch("^[@][a-zA-Z0-9_]*", stringToParse)):
-        return (("VAR", stringToParse, linenr))
-
-    else:
-        return (("ERROR", stringToParse, linenr))
-
-def returnTupleFromString(stringToParse : str, linenr : int) -> (Tuple[str, str, int]):
-
-    if (stringToParse == "+"):
-        return (("PLUS", stringToParse, linenr))
-    if (stringToParse == "-"):
-        return (("MIN", stringToParse, linenr))
-    if (stringToParse == "*"):
-        return (("MULTIPLY", stringToParse, linenr))
-    if (stringToParse == "/"):
-        return (("DEVIDED_BY", stringToParse, linenr))
-    if (stringToParse.isnumeric() or (stringToParse[0] == "-" and stringToParse[1:].isnumeric())):
-        return (("NUMBER", stringToParse, linenr))
-    if(stringToParse == "if"):
-        return (("IF", stringToParse, linenr))
-    if (stringToParse == "else"):
-        return (("ELSE", stringToParse, linenr))
-    if (stringToParse == "="):
-        return (("ASSIGN", stringToParse, linenr))
-    if (stringToParse == "while"):
-        return (("WHILE", stringToParse, linenr))
-
-    if (stringToParse == "=="):
-        return (("EQUAL", stringToParse, linenr))
-    if (stringToParse == "!="):
-        return (("NOTEQUAL", stringToParse, linenr))
-    if (stringToParse == ">="):
-        return (("GE", stringToParse, linenr))
-    if (stringToParse == "<="):
-        return (("SE", stringToParse, linenr))
-    if (stringToParse == ">"):
-        return (("GREATER", stringToParse, linenr))
-    if (stringToParse == "<"):
-        return (("SMALLER", stringToParse, linenr))
-
-    if (stringToParse == ";"):
-        return (("SEMICOLON", stringToParse, linenr))
-    if (stringToParse == "("):
-        return (("LPAREN", stringToParse, linenr))
-    if (stringToParse == ")"):
-        return (("RPAREN", stringToParse, linenr))
-    if (stringToParse == "{"):
-        return (("LBRACE", stringToParse, linenr))
-    if (stringToParse == "}"):
-        return (("RBRACE", stringToParse, linenr))
-    if (stringToParse == "print"):
-        return (("PRINT", stringToParse, linenr))
+        return ((TokenValues.PRINT, stringToParse, linenr))
     if (stringToParse == "#"):
-        return (("PRINT_END", stringToParse, linenr))
-    if (re.fullmatch("^[a-zA-Z_][a-zA-Z0-9_]*", stringToParse)):
-        return (("VAR", stringToParse, linenr))
+        return ((TokenValues.PRINT_END, stringToParse, linenr))
+    if (re.fullmatch("^[@][a-zA-Z0-9_]*", stringToParse)):
+        return ((TokenValues.VAR, stringToParse, linenr))
 
     else:
-        return (("ERROR", stringToParse, linenr))
+        return ((TokenValues.ERROR, stringToParse, linenr))
 
 # fileToWordlist :: str -> List[str]
 def fileToWordlist(string_file : str) -> List[str]:
@@ -223,7 +171,7 @@ def lexer(filename : str) -> Union[Tuple[List[Token], Error], Tuple[None, Error]
     fileContainer = readFromFile(filename)
     if(fileContainer != None):
         tokenlist = lex_rec(lex_func, fileContainer)
-        errorlist = list(filter(lambda x: x.instance == "ERROR", tokenlist))
+        errorlist = list(filter(lambda x: x.instance == TokenValues.ERROR, tokenlist))
         error = Error(Errornr.NO_ERROR)
         if (len(errorlist) > 0):
             error = (Error(Errornr.SYNTAX_ERROR, "On line " + str(errorlist[0].linenr) + ", cannot define " + " \"" + errorlist[0].type + "\" " + " "))

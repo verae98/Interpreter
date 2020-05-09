@@ -1,25 +1,24 @@
 from typing import List, Tuple, Union, Callable
 from Lexer import Token
-from Enums import Error, Errornr, State
+from Enums import Error, Errornr, State, TokenValues
 import copy
 
 class Node():
 
-    def __init__(self, linenr : int = 0, value : str = None, type : str = None):
+    def __init__(self, linenr : int = 0, value : str = None, type : TokenValues = None):
         self.value = value
         self.type = type
         self.linenr = linenr
 
     def __str__(self) -> str:
-        return ("(value: " + (" None " if self.value is None else self.value) + " Type: " + (
-        " None " if self.type is None else self.type) + ")\n")
+        return ("(value: " + (" None " if self.value is None else self.value) + " Type: " + str(self.type) + ")\n")
 
     def __repr__(self) -> str:
         return self.__str__()
 
 class operator_node(Node):
 
-    def __init__(self, linenr : int, value : str = None , lhs : Node = None , operator : str = None, rhs : Node = None):
+    def __init__(self, linenr : int, value : str = None , lhs : Node = None , operator : TokenValues = None, rhs : Node = None):
         Node.__init__(self, linenr, value, operator )
         self.value = value
         self.lhs = lhs
@@ -29,20 +28,20 @@ class operator_node(Node):
 
     def __str__(self) -> str:
         return ("(value: " + (" None " if self.value is None else self.value) + " lhs: " + (" None " if self.lhs is None else self.lhs.__repr__())
-                + " operator: " + (" None " if self.operator is None else self.operator) + " rhs: " + (" None " if self.rhs is None else self.rhs.__repr__()) + ")\n")
+                + " operator: " + str(self.operator.name) + " rhs: " + (" None " if self.rhs is None else self.rhs.__repr__()) + ")\n")
 
     def __repr__(self) -> str:
         return self.__str__()
 
 class value_node(Node):
-    def __init__(self, linenr : int, value : str = None, type : str = None):
+    def __init__(self, linenr : int, value : str = None, type : TokenValues = None):
         Node.__init__(self, linenr, value, type)
         self.value = value
         self.type = type
         self.linenr = linenr
 
     def __str__(self):
-        return ("(value: " + (" None " if self.value is None else self.value) + " Type: " + (" None " if self.type is None else self.type) + ")\n" )
+        return ("(value: " + (" None " if self.value is None else self.value) + " Type: " + str(self.type.name) +  ")\n" )
 
     def __repr__(self):
         return self.__str__()
@@ -78,10 +77,10 @@ def processMath(currentToken1: Token, current_node1 : Node) -> (Node, [Error]):
     error = []
     currentToken = copy.copy(currentToken1)
     current_node = copy.copy(current_node1)
-    if (currentToken.instance == "PLUS" or currentToken.instance == "MIN"):
+    if (currentToken.instance == TokenValues.PLUS or currentToken.instance == TokenValues.MIN):
         new_node = operator_node(currentToken.linenr, currentToken.type, current_node, currentToken.instance)
         return new_node, error
-    elif (currentToken.instance == "MULTIPLY" or currentToken.instance == "DEVIDED_BY"):
+    elif (currentToken.instance == TokenValues.MULTIPLY or currentToken.instance == TokenValues.DIVIDED_BY):
         # find the node that is not filled yet
         node_ = findNode(current_node)
         if(node_ != None):
@@ -119,19 +118,19 @@ def processComparison(tokens1: List[Token]) -> (Node, List[Error]):
     error = []
     tokens = copy.copy(tokens1)
     # get first element that meets the condition
-    func = lambda currentToken: currentToken.instance == "EQUAL" or currentToken.instance == "NOTEQUAL" or currentToken.instance == "GE" \
-        or currentToken.instance == "SE" or currentToken.instance == "GREATER" or currentToken.instance == "SMALLER"
+    func = lambda currentToken: currentToken.instance == TokenValues.EQUAL or currentToken.instance == TokenValues.NOTEQUAL or currentToken.instance == TokenValues.GE \
+        or currentToken.instance == TokenValues.SE or currentToken.instance == TokenValues.GREATER or currentToken.instance == TokenValues.SMALLER
     index = _getFirst(list(map(func, tokens)))
 
     lhs, pv_lhs = processTokens(tokens[:index])# process the tokens till the comparison token
     if(len(pv_lhs.error_list) > 0):
-        error.append(pv_lhs.error_list)
+        error += (pv_lhs.error_list)
     if (pv_lhs.state == State.ERROR or len(lhs) > 1 ):
-        error.append(Error(Errornr.SYNTAX_ERROR, "On line " + str(tokens[0].linenr) + " ^" + str(tokens[0].type) + " invalid syntax: too many arguments for comparison"))
+        error += (Error(Errornr.SYNTAX_ERROR, "On line " + str(tokens[0].linenr) + " ^" + str(tokens[0].type) + " invalid syntax: too many arguments for comparison"))
 
     rhs, pv_rhs = processTokens(tokens[index + 1:]) # process the tokens after the comparison token
     if(len(pv_rhs.error_list) > 0):
-        error.append(pv_rhs.error_list)
+        error += (pv_rhs.error_list)
     if ((pv_rhs.state == State.ERROR or len(rhs) > 1) and len(error) == 0):
         error.append(Error(Errornr.SYNTAX_ERROR, "On line " + str(tokens[0].linenr) + " ^" + str(tokens[index + 1].type) + " invalid syntax: too many arguments for comparison"))
     current_node = operator_node(tokens[index].linenr, tokens[index].type, lhs[0], tokens[index].instance, rhs[0])
@@ -144,9 +143,9 @@ def processIf_While(tokens1: List[Token]) -> Union[Tuple[Node, List[Error]], Tup
     error = []
     tokens = copy.copy(tokens1)
     # get index of all important tokens
-    index_parL = getIndexToken(lambda x: x.instance == "LPAREN", tokens)
-    index_parR = getIndexToken(lambda x: x.instance == "RPAREN", tokens)
-    index_bracL = getIndexToken(lambda x: x.instance == "LBRACE", tokens)
+    index_parL = getIndexToken(lambda x: x.instance == TokenValues.LPAREN, tokens)
+    index_parR = getIndexToken(lambda x: x.instance == TokenValues.RPAREN, tokens)
+    index_bracL = getIndexToken(lambda x: x.instance == TokenValues.LBRACE, tokens)
 
     # check for syntax errors
     if(index_parL == -1 or index_parR == -1):
@@ -176,12 +175,16 @@ def processAssign(tokens1: List[Token]) -> (Node, List[Error]):
     """Retrieve tokens and return a node according to the assign layout. """
     error = []
     tokens = copy.copy(tokens1)
-    index = getIndexToken(lambda x: x.instance == "ASSIGN", tokens) # get index of assignment
+    index = getIndexToken(lambda x: x.instance == TokenValues.ASSIGN, tokens) # get index of assignment
     if(index != 1):
         error.append(Error(Errornr.SYNTAX_ERROR, "too many arguments for assignment"))
-    if(tokens[0].instance != "VAR"):
+    if(tokens[0].instance != TokenValues.VAR):
         error.append(Error(Errornr.SYNTAX_ERROR, "on line " + str(tokens[0].linenr) + " -> \"" + tokens[0].type + "\" cannot be an variable"))
-    lhs = value_node(tokens[0].linenr, tokens[0].type, "VAR_ASSIGN")
+    lhs = value_node(tokens[0].linenr, tokens[0].type, TokenValues.VAR_ASSIGN)
+    # check if after assignment there are enough parameters (value and terminator)
+    if(index + 1 >= len(tokens) -1):
+        error.append(Error(Errornr.SYNTAX_ERROR, "On line " + str(tokens[index].linenr) + ", invalid syntax"))
+        return None, error
     rhs, pv1 = processTokens(tokens[index+1:])
     pv = copy.copy(pv1)
     pv.unprocessedTokens = []
@@ -217,36 +220,28 @@ def amountOpenBraces(tokens: List[Token]) -> int:
         return 0
     braces = amountOpenBraces(tokens[:-1])
     currentToken = tokens[-1]
-    if(currentToken.instance == "LBRACE"):
+    if(currentToken.instance == TokenValues.LBRACE):
         braces = braces + 1
-    elif(currentToken.instance == "RBRACE"):
+    elif(currentToken.instance == TokenValues.RBRACE):
         braces = braces - 1
     return braces
 
 
-def processTokens(tokens: List[Token]) -> ([Node], ProgramValues):
-    nodes, pv1 = _processTokens(tokens)
-    pv1.unprocessedTokens = []
-    pv = copy.copy(pv1)
-    pv.unprocessedTokens = []
-
-    return nodes, pv
-
 # _processTokens :: List[Tokens] -> Tuple[List[Node], ProgramValues]
-def _processTokens(tokens1: List[Token]) -> (List[Node], ProgramValues):
+def processTokens(tokens1: List[Token]) -> (List[Node], ProgramValues):
     """Retrieve the tokens that needs to be processed. Check in the token the instance and act accordingly
     It returns the nodes of the processed tokens and the ProgramValues"""
     tokens = copy.copy(tokens1)
     if(len(tokens) == 0):
         return [], ProgramValues(unprocessed = []) # default values
 
-    nodes, pv_old = _processTokens(tokens[0:-1])
+    nodes, pv_old = processTokens(tokens[0:-1])
     pv = copy.copy(pv_old)
     currentToken = tokens[-1]
     if(pv.state == State.ERROR):
         return nodes, pv
     if(pv.state == State.PRINT):
-        if(currentToken.instance == "PRINT_END"):
+        if(currentToken.instance == TokenValues.PRINT_END):
             new_node = operator_node(pv.unprocessedTokens[0].linenr, pv.unprocessedTokens[0].type, None, pv.unprocessedTokens[0].instance)
             rhs, pv = copy.copy(processTokens(pv.unprocessedTokens[1:]))
             pv.state = State.Idle
@@ -260,13 +255,13 @@ def _processTokens(tokens1: List[Token]) -> (List[Node], ProgramValues):
 
     if (pv.state == State.Math):
         # program rules, assignment before math
-        if (currentToken.instance == "ASSIGN"):
+        if (currentToken.instance == TokenValues.ASSIGN):
             pv.state = State.ASSIGN
             # remove incorrect math equation
             nodes = nodes[:-1]
             pv.unprocessedTokens.append(currentToken)
-        elif (currentToken.instance != "NUMBER" and currentToken.instance != "VAR" and currentToken.instance != "PLUS" and currentToken.instance != "MIN" and
-                    currentToken.instance != "MULTIPLY" and currentToken.instance != "DEVIDED_BY"):
+        elif (currentToken.instance != TokenValues.NUMBER and currentToken.instance != TokenValues.VAR and currentToken.instance != TokenValues.PLUS and currentToken.instance != TokenValues.MIN and
+                    currentToken.instance != TokenValues.MULTIPLY and currentToken.instance != TokenValues.DIVIDED_BY):
             # math state is over, remove processed tokens
             pv.unprocessedTokens = []
             pv.state = State.Idle
@@ -275,11 +270,11 @@ def _processTokens(tokens1: List[Token]) -> (List[Node], ProgramValues):
             nodes[-1], error = processMath(currentToken, nodes[-1])
             if(len(error) > 0):
                 pv.state = State.ERROR
-                pv.error_list.append(error)
+                pv.error_list += (error)
         return nodes, pv
 
     elif (pv.state == State.ASSIGN):
-        if(currentToken.instance == "SEMICOLON"):
+        if(currentToken.instance == TokenValues.SEMICOLON):
             pv.unprocessedTokens.append(currentToken)
             new_node, error_list = processAssign(pv.unprocessedTokens)
             if (len(error_list) > 0):
@@ -296,7 +291,7 @@ def _processTokens(tokens1: List[Token]) -> (List[Node], ProgramValues):
 
     elif(pv.state == State.IF_WHILE):
         pv.unprocessedTokens.append(currentToken)
-        if(currentToken.instance == "RBRACE"):
+        if(currentToken.instance == TokenValues.RBRACE):
             amountBraces = amountOpenBraces(pv.unprocessedTokens)
             if (amountBraces == 0):
                 new_node, error_list = processIf_While(pv.unprocessedTokens)
@@ -309,13 +304,13 @@ def _processTokens(tokens1: List[Token]) -> (List[Node], ProgramValues):
                 pv.state = State.Idle
                 nodes.append(Node())
             elif (amountBraces < 0):
-                print("error braces not correct")
+                pv.error_list.append(Error(Errornr.SYNTAX_ERROR, "on line " + str(pv.unprocessedTokens[0].linenr) + ", missing opening brace"))
 
         return nodes, pv
 
 
-    elif(currentToken.instance == "PLUS" or currentToken.instance == "MIN" or
-                 currentToken.instance == "MULTIPLY" or currentToken.instance == "DEVIDED_BY" or currentToken.instance == "NUMBER" or currentToken.instance == "VAR"):
+    elif(currentToken.instance == TokenValues.PLUS or currentToken.instance == TokenValues.MIN or
+                 currentToken.instance == TokenValues.MULTIPLY or currentToken.instance == TokenValues.DIVIDED_BY or currentToken.instance == TokenValues.NUMBER or currentToken.instance == TokenValues.VAR):
         if(pv.state == State.Idle):
             pv.state = State.Math
             nodes.append(Node())
@@ -323,29 +318,29 @@ def _processTokens(tokens1: List[Token]) -> (List[Node], ProgramValues):
             if (len(pv.unprocessedTokens) < 0):
                 nodes[-1], error = processMath(pv.unprocessedTokens[0], nodes[-1])
                 if (len(error) > 0):
-                    state = State.ERROR
-                    pv.error_list.append(error)
+                    pv.error_list += (error)
+                    pv.state = State.ERROR
                     return nodes, pv
 
             nodes[-1], error = processMath(currentToken, nodes[-1])
             if (len(error) > 0):
                 pv.state = State.ERROR
-                pv.error_list.append(error)
+                pv.error_list += (error)
                 return nodes, pv
 
 
-    elif (currentToken.instance == "ASSIGN"):
+    elif (currentToken.instance == TokenValues.ASSIGN):
         if (pv.state == State.Idle):
             pv.state = State.ASSIGN
 
 
-    elif(currentToken.instance == "IF"):
+    elif(currentToken.instance == TokenValues.IF):
         pv.state = State.IF_WHILE
 
-    elif (currentToken.instance == "WHILE"):
+    elif (currentToken.instance == TokenValues.WHILE):
         pv.state = State.IF_WHILE
 
-    elif (currentToken.instance == "PRINT"):
+    elif (currentToken.instance == TokenValues.PRINT):
         pv.state = State.PRINT
 
     pv.unprocessedTokens.append(currentToken)
