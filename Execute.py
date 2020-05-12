@@ -6,11 +6,13 @@ class ProgramActions():
     def __init__(self):
         self.variables = {}
         self.enum_dict = {}
-        self.devide = smart_devide(lambda x, y : x/y)
+        @smart_devide
+        def divide (a,b):
+            return a/b
         self.enum_dict[TokenValues.PLUS.value] = lambda a, b : a + b
         self.enum_dict[TokenValues.MIN.value] = lambda a, b: a - b
         self.enum_dict[TokenValues.MULTIPLY.value] = lambda a, b: a * b
-        self.enum_dict[TokenValues.DIVIDED_BY.value] = lambda a, b: self.devide(a,b)
+        self.enum_dict[TokenValues.DIVIDED_BY.value] = lambda a, b: divide(a,b)
         self.enum_dict[TokenValues.ASSIGN.value] = lambda d, key, value: d.update({key:value})
         self.enum_dict[TokenValues.EQUAL.value] = lambda a, b : a == b
         self.enum_dict[TokenValues.NOTEQUAL.value] = lambda a, b: a != b
