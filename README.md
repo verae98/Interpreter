@@ -98,10 +98,6 @@ The interpreter uses the following high order functions:
 ## Inheritance 
 The interpreter has one inheritance, this is for the Node class. This class has two childs: operator_node and value_node
 
-## Link to instruction video
-For VES++ I have made an instruction video about how to use VES++ and how the interpreter behind VES++ works
-[![https://www.youtube.com/watch?v=KA2rNhLQ7nc](http://img.youtube.com/vi/KA2rNhLQ7nc/0.jpg)](http://www.youtube.com/watch?v=KA2rNhLQ7nc)
-
 
 ## Examples
 Below are examples shown of the VES++ code. 
